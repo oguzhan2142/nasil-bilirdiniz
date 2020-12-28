@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "234143425480",
+    "project_id": "kpss-tercih",
+    "storage_bucket": "kpss-tercih.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:234143425480:android:8f827fc0f15779fbd196fd",
+        "android_client_info": {
+          "package_name": "com.oguzhan.kpss_tercih"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "234143425480-lju406b1g4sbkl2l9jdk7gj3savhvja2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUac8EHP0RtIUwQRDp9Ln8b5jeNDBCWK4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "234143425480-lju406b1g4sbkl2l9jdk7gj3savhvja2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "234143425480-hkbf7odo72m187gobagq0c34gp68dt66.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.oguzhan.kpssTercih"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
