@@ -6,11 +6,11 @@ import 'package:kpss_tercih/database.dart' as db;
 class EditableSlidableItem extends StatefulWidget {
   final String profileKey;
   Function onCancel;
-  Function onPressingFloattingAction;
+  Function updatePostWidgets;
   FocusNode focusNode = FocusNode();
 
   EditableSlidableItem(
-      {Key key, this.onPressingFloattingAction, this.onCancel, this.profileKey})
+      {Key key, this.updatePostWidgets, this.onCancel, this.profileKey})
       : super(key: key);
 
   @override
@@ -71,7 +71,7 @@ class _EditableSlidableItemState extends State<EditableSlidableItem> {
                           Row(
                             children: [
                               Text(
-                                'widget.header',
+                                db.displayName,
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,
@@ -79,7 +79,15 @@ class _EditableSlidableItemState extends State<EditableSlidableItem> {
                               ),
                               SizedBox(width: 20),
                               FlatButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  db.createPostOnSomeoneWall(
+                                    widget.profileKey,
+                                    db.authUserID,
+                                    editableController.text,
+                                  );
+                                  widget.onCancel();
+                                  widget.updatePostWidgets();
+                                },
                                 splashColor: Colors.amber,
                                 child: Text('Yayınla',
                                     style: TextStyle(
@@ -112,8 +120,8 @@ class _EditableSlidableItemState extends State<EditableSlidableItem> {
                           Container(
                             padding: EdgeInsets.all(5),
                             decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: Colors.amber, width: 1)),
+                                border:
+                                    Border.all(color: Colors.amber, width: 1)),
                             child: EditableText(
                                 keyboardType: TextInputType.multiline,
                                 maxLines: null,

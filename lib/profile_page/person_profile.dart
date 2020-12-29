@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:kpss_tercih/database.dart';
+import 'package:kpss_tercih/database.dart' as db;
 import 'package:kpss_tercih/firestore.dart';
 import 'package:kpss_tercih/profile_page/person_card_widget.dart';
 import 'package:kpss_tercih/profile_page/slidable_item.dart';
@@ -31,7 +31,7 @@ class _PersonProfleState extends State<PersonProfle> {
   @override
   void initState() {
     super.initState();
-    getListFromDb('followers').then((value) {
+    db.getListFromDb('followers').then((value) {
       // List tempList = Utils.removeNulls(value);
 
       setState(() {
@@ -39,20 +39,20 @@ class _PersonProfleState extends State<PersonProfle> {
       });
     });
 
-    getListFromDb('followings').then((value) {
+    db.getListFromDb('followings').then((value) {
       // List tempList = Utils.removeNulls(value);
       setState(() {
         if (value != null) _followingList = value;
       });
     });
 
-    getPosts().then((value) {
+    db.getPostsMap().then((value) {
       setState(() {
         if (value != null) _postList = value;
       });
     });
 
-    _userInfo = getUserInfo('displayName');
+    _userInfo = db.getUserInfo('displayName');
     _expandableController.addListener(() {
       if (_expandableController.expanded)
         setState(() {
@@ -106,23 +106,15 @@ class _PersonProfleState extends State<PersonProfle> {
                   children: [
                     ExpandablePanel(
                       controller: _expandableController,
-                      header: FutureBuilder(
-                        future: _userInfo,
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData)
-                            return Text(
-                              snapshot.data.toString(),
+                      header: Text(
+                              db.displayName,
                               style: TextStyle(
                                 color: _headerColor,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 18,
                                 letterSpacing: 0.2,
                               ),
-                            );
-                          else
-                            return Container();
-                        },
-                      ),
+                            ),
                       theme: ExpandableThemeData(
                         headerAlignment: ExpandablePanelHeaderAlignment.center,
                         iconColor: _headerColor,

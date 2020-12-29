@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kpss_tercih/profile_page/person_profile.dart';
-
+import 'database.dart' as db;
 import 'search_page/search_page.dart';
 
 class Home extends StatefulWidget {
@@ -15,7 +15,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    
+    db.initDisplayName();
   }
 
   @override
@@ -23,21 +23,22 @@ class _HomeState extends State<Home> {
     return Scaffold(
         body: getPage(),
         bottomNavigationBar: BottomNavigationBar(
-          items: [
-            BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.notifications), label: 'Notifications'),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          ],
-          currentIndex: _selectedIndex,
-          elevation: 0,
-          onTap: _onItemTapped,
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Colors.white54,
-          iconSize: 28,
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.black.withOpacity(0.91)
-        ));
+            items: [
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.search), label: 'Search'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.notifications), label: 'Notifications'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.person), label: 'Profile'),
+            ],
+            currentIndex: _selectedIndex,
+            elevation: 0,
+            onTap: _onItemTapped,
+            selectedItemColor: Colors.white,
+            unselectedItemColor: Colors.white54,
+            iconSize: 28,
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.black.withOpacity(0.91)));
   }
 
   Widget getPage() {

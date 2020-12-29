@@ -1,6 +1,6 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
-import 'package:kpss_tercih/database.dart';
+import 'package:kpss_tercih/database.dart' as db;
 import 'package:kpss_tercih/firestore.dart';
 import 'package:kpss_tercih/profile_page/editable_slidable_item.dart';
 import 'package:kpss_tercih/profile_page/person_card_widget.dart';
@@ -23,7 +23,7 @@ class _DeauthProfileState extends State<DeauthProfile> {
   ExpandableController _expandableController = ExpandableController();
   Color _headerColor = Colors.white;
   bool _isFollowingThisUser = true;
-  List<Widget> _postsWidgets = List();
+  List<Widget> postsWidgets = List();
   Image _profileImageWidget;
   EditableSlidableItem editableSlidableItem;
   bool floatingActionVisible = true;
@@ -34,10 +34,10 @@ class _DeauthProfileState extends State<DeauthProfile> {
 
     if (widget.profileData['posts'] != null)
       widget._postsMap = widget.profileData['posts'];
-    List _followers = extractList(widget.profileData['followers']);
+    List _followers = mapToList(widget.profileData['followers']);
     if (_followers != null) _followersList = _followers;
 
-    List followings = extractList(widget.profileData['followings']);
+    List followings = mapToList(widget.profileData['followings']);
     if (followings != null) _followingList = followings;
 
     _expandableController.expanded = true;
@@ -53,8 +53,31 @@ class _DeauthProfileState extends State<DeauthProfile> {
 
     checkFollowing();
 
-    widget._postsMap.entries.forEach((element) {
-      _postsWidgets.add(SlidableItem(
+    updatePostWidgetsList();
+
+    editableSlidableItem = EditableSlidableItem(
+      profileKey: widget.profileKey,
+      updatePostWidgets: updatePostWidgetsList,
+      onCancel: () {
+        List<Widget> temp = List();
+        temp.addAll(postsWidgets);
+        temp.remove(editableSlidableItem);
+
+        setState(() {
+          postsWidgets = temp;
+          floatingActionVisible = true;
+        });
+      },
+    );
+  }
+
+  void updatePostWidgetsList() async {
+    List<Widget> widgets = List();
+
+    Map postMap = await db.getPostsMap(userID: widget.profileKey);
+
+    postMap.entries.forEach((element) {
+      widgets.add(SlidableItem(
         profileKey: widget.profileKey,
         postKey: element.key,
         header: element.value['author'],
@@ -62,30 +85,20 @@ class _DeauthProfileState extends State<DeauthProfile> {
       ));
     });
 
-    editableSlidableItem = EditableSlidableItem(
-      profileKey: widget.profileKey,
-      onCancel: () {
-        List<Widget> temp = List();
-        temp.addAll(_postsWidgets);
-        temp.remove(editableSlidableItem);
-
-        setState(() {
-          _postsWidgets = temp;
-          floatingActionVisible = true;
-        });
-      },
-    );
+    setState(() {
+      postsWidgets = widgets;
+    });
   }
 
   void checkFollowing() async {
-    isFollowing(widget.profileKey).then((isFollowing) {
+    db.isFollowing(widget.profileKey).then((isFollowing) {
       setState(() {
         _isFollowingThisUser = isFollowing;
       });
     });
   }
 
-  List<dynamic> extractList(Map map) {
+  List<dynamic> mapToList(Map map) {
     List<dynamic> list = List();
     if (map == null) return null;
     map.forEach((key, value) {
@@ -104,11 +117,11 @@ class _DeauthProfileState extends State<DeauthProfile> {
           onPressed: () {
             _expandableController.expanded = false;
             List<Widget> temp = List();
-            temp.addAll(_postsWidgets);
+            temp.addAll(postsWidgets);
             temp.add(editableSlidableItem);
 
             setState(() {
-              _postsWidgets = temp;
+              postsWidgets = temp;
               floatingActionVisible = false;
             });
             editableSlidableItem.focusNode.requestFocus();
@@ -148,7 +161,6 @@ class _DeauthProfileState extends State<DeauthProfile> {
                         ),
                         expanded: Row(
                           children: [
-                            // Buraya dbden resmi alak
                             _profileImageWidget,
                             SizedBox(width: 16),
                             Expanded(
@@ -165,7 +177,8 @@ class _DeauthProfileState extends State<DeauthProfile> {
                                   !_isFollowingThisUser
                                       ? FlatButton(
                                           onPressed: () {
-                                            addUserToFollowings(
+                                            db
+                                                .addUserToFollowings(
                                                     widget.profileKey)
                                                 .whenComplete(
                                                     () => checkFollowing());
@@ -184,7 +197,8 @@ class _DeauthProfileState extends State<DeauthProfile> {
                                         )
                                       : FlatButton(
                                           onPressed: () {
-                                            removeUserFromFollowings(
+                                            db
+                                                .removeUserFromFollowings(
                                                     widget.profileKey)
                                                 .whenComplete(
                                                     () => checkFollowing());
@@ -229,8 +243,7 @@ class _DeauthProfileState extends State<DeauthProfile> {
                               Text(
                                 widget._postsMap.length.toString(),
                                 style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold),
+                                    fontSize: 20, fontWeight: FontWeight.bold),
                               ),
                               Text('Posts', style: TextStyle(fontSize: 16))
                             ],
@@ -242,11 +255,9 @@ class _DeauthProfileState extends State<DeauthProfile> {
                               Text(
                                 _followersList.length.toString(),
                                 style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold),
+                                    fontSize: 20, fontWeight: FontWeight.bold),
                               ),
-                              Text('Followers',
-                                  style: TextStyle(fontSize: 16))
+                              Text('Followers', style: TextStyle(fontSize: 16))
                             ],
                           ),
                         ),
@@ -256,17 +267,15 @@ class _DeauthProfileState extends State<DeauthProfile> {
                               Text(
                                 _followingList.length.toString(),
                                 style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold),
+                                    fontSize: 20, fontWeight: FontWeight.bold),
                               ),
-                              Text('Following',
-                                  style: TextStyle(fontSize: 16))
+                              Text('Following', style: TextStyle(fontSize: 16))
                             ],
                           ),
                         ),
                       ]),
                   body: TabBarView(children: [
-                    ListView(children: _postsWidgets),
+                    ListView(children: postsWidgets),
                     ListView(
                       children: _followersList
                           .map((e) => PersonCard(personUid: e))

@@ -8,8 +8,15 @@ class SlidableItem extends StatefulWidget {
   final String content;
   final String postKey;
   final String profileKey;
+  final String authorId;
+
   SlidableItem(
-      {Key key, this.profileKey, this.postKey, this.header, this.content})
+      {Key key,
+      this.authorId,
+      this.profileKey,
+      this.postKey,
+      this.header,
+      this.content})
       : super(key: key);
 
   @override
@@ -32,10 +39,9 @@ class _SlidableItemState extends State<SlidableItem> {
     _imageWidget = Image(
       image: AssetImage('res/user.png'),
       width: 40,
-      color: Colors.white,
     );
 
-    getDownloadLink(uid: widget.profileKey).then((value) => setState(() {
+    getDownloadLink(uid: widget.authorId).then((value) => setState(() {
           if (value != null) _imageWidget = Image.network(value, width: 40);
         }));
 

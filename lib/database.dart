@@ -6,8 +6,8 @@ String authUserID = FirebaseAuth.instance.currentUser.uid;
 
 String displayName;
 
-void initDisplayName() {
-  displayName = '';
+void initDisplayName() async {
+  displayName = await getUserInfo('displayName');
 }
 
 Future<bool> isAuthUserExistInDb() async {
@@ -161,22 +161,35 @@ void createDatabaseRecordForUser() async {
   firebaseRef.child('persons/$uId').remove();
 }
 
+void createPostOnSomeoneWall(String userId, String authorId, String content) {
+  var id = firebaseRef.child('persons').child(userId).child('posts').push();
+  id.set({'author': displayName, 'content': content, 'authorId': authorId});
+}
+
 void postData(dynamic data, String child) {
   String uId = FirebaseAuth.instance.currentUser.uid;
   var x = firebaseRef.child('persons/$uId/$child').push();
   x.set(data);
 }
 
-Future<Map> getPosts() async {
-  DatabaseReference ref = firebaseRef.child('persons/$authUserID/posts');
+Future<Map> getPostsMap({String userID}) async {
+  String id = userID == null ? authUserID : userID;
+
+  DatabaseReference ref = firebaseRef.child('persons').child(id).child('posts');
   DataSnapshot snapshot = await ref.once();
   return snapshot.value;
 }
 
-Future<List> getListFromDb(String child) async {
+Future<List> getListFromDb(String child, {String userId}) async {
+  String id;
+  if (userId != null)
+    id = userId;
+  else
+    id = authUserID;
+
   List<String> list = List();
 
-  DatabaseReference ref = firebaseRef.child('persons/$authUserID/$child');
+  DatabaseReference ref = firebaseRef.child('persons').child(id).child(child);
   var snapshot = await ref.once();
   Map<dynamic, dynamic> values = snapshot.value;
   if (values != null) {
