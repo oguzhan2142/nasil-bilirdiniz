@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:kpss_tercih/database.dart';
-import 'package:kpss_tercih/firestore.dart';
+import 'package:kpss_tercih/firebase/database.dart';
+import 'package:kpss_tercih/firebase/firestore.dart';
 
 class SlidableItem extends StatefulWidget {
   final String header;

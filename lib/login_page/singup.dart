@@ -1,4 +1,4 @@
-import 'package:kpss_tercih/database.dart';
+import 'package:kpss_tercih/firebase/database.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 

@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:kpss_tercih/login_page/authentication_service.dart';
-import 'package:kpss_tercih/database.dart';
+import 'package:kpss_tercih/firebase/database.dart';
 import 'package:provider/provider.dart';
 
 class Login extends StatelessWidget {

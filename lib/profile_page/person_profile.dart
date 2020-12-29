@@ -6,8 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:kpss_tercih/database.dart' as db;
-import 'package:kpss_tercih/firestore.dart';
+import 'package:kpss_tercih/firebase/database.dart' as db;
+import 'package:kpss_tercih/firebase/firestore.dart';
 import 'package:kpss_tercih/profile_page/person_card_widget.dart';
 import 'package:kpss_tercih/profile_page/slidable_item.dart';
 

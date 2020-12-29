@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:kpss_tercih/database.dart';
+import 'package:kpss_tercih/firebase/database.dart';
 
-import '../deauth_profile.dart';
+import '../profile_page/deauth_profile.dart';
 
 class SearchTileItem extends StatefulWidget {
   @override

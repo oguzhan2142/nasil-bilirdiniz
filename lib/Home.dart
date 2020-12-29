@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kpss_tercih/profile_page/person_profile.dart';
-import 'database.dart' as db;
+import 'firebase/database.dart' as db;
 import 'search_page/search_page.dart';
 
 class Home extends StatefulWidget {

@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:kpss_tercih/database.dart';
-import 'package:kpss_tercih/deauth_profile.dart';
-import 'package:kpss_tercih/firestore.dart';
+import 'package:kpss_tercih/firebase/database.dart';
+import 'package:kpss_tercih/profile_page/deauth_profile.dart';
+import 'package:kpss_tercih/firebase/firestore.dart';
 import 'package:kpss_tercih/profile_page/person_profile.dart';
 import 'package:kpss_tercih/search_page/search_tile_item.dart';
 
