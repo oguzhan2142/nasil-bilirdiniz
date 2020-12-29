@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'package:kpss_tercih/notification_page/notification_item.dart';
 
 class NotificationPage extends StatefulWidget {
@@ -13,12 +14,40 @@ class _NotificationPageState extends State<NotificationPage> {
   void initState() {
     super.initState();
 
-    notificationWidgetsList.addAll([
-      NotificationItem(),
-      NotificationItem(),
-      NotificationItem(),
-      NotificationItem(),
-    ]);
+    db.fetchNotifications().then((notificationMap) {
+      List<Widget> temp = List();
+
+      DateTime nowDateTime = DateTime.now();
+      notificationMap.values.forEach((notification) {
+        NotificationType type;
+        if (notification['type'] == NotificationType.post.toString())
+          type = NotificationType.post;
+        else if (notification['type'] == NotificationType.like.toString())
+          type = NotificationType.like;
+        else if (notification['type'] == NotificationType.followed.toString())
+          type = NotificationType.followed;
+
+        DateTime dateTime = DateTime.parse(notification['date']);
+
+        Duration diff = nowDateTime.difference(dateTime);
+
+        String date = '';
+        if (diff.inHours == 0)
+          date = '${diff.inMinutes} dakika önce';
+        else
+          date = '${diff.inHours} saat önce';
+
+        temp.add(NotificationItem(
+          type: type,
+          date: date,
+          message: notification['message'],
+        ));
+      });
+
+      setState(() {
+        notificationWidgetsList = temp;
+      });
+    });
   }
 
   @override

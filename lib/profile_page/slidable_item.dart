@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:kpss_tercih/firebase/database.dart';
+import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'package:kpss_tercih/firebase/firestore.dart';
+import 'package:kpss_tercih/notification_page/notification_item.dart';
 
 class SlidableItem extends StatefulWidget {
   final String header;
@@ -45,7 +46,7 @@ class _SlidableItemState extends State<SlidableItem> {
           if (value != null) _imageWidget = Image.network(value, width: 40);
         }));
 
-    isPostLiked(widget.postKey, widget.profileKey).then((isLiked) {
+    db.isPostLiked(widget.postKey, widget.profileKey).then((isLiked) {
       updateLikedImage(isLiked);
     });
 
@@ -53,7 +54,7 @@ class _SlidableItemState extends State<SlidableItem> {
   }
 
   void updateLikeAmountText() {
-    getLikeAmount(widget.postKey, widget.profileKey).then((value) {
+    db.getLikeAmount(widget.postKey, widget.profileKey).then((value) {
       setState(() {
         _likeAmount = value;
       });
@@ -129,16 +130,27 @@ class _SlidableItemState extends State<SlidableItem> {
                           style: TextStyle(color: Colors.amber, fontSize: 12)),
                       GestureDetector(
                         onTap: () async {
-                          bool isLiked = await isPostLiked(
+                          bool isLiked = await db.isPostLiked(
                               widget.postKey, widget.profileKey);
 
                           if (isLiked) {
-                            await unLikePost(widget.postKey, widget.profileKey);
+                            await db.unLikePost(
+                                widget.postKey, widget.profileKey);
+                                                            String message =
+                                '${db.displayName} beğenisini kaldırdı';
+                            db.createNotification(NotificationType.like,
+                                widget.profileKey, message);
+
                           } else {
-                            await likePost(widget.postKey, widget.profileKey);
+                            await db.likePost(
+                                widget.postKey, widget.profileKey);
+                            String message =
+                                '${db.displayName} bir gönderiyi beğendi';
+                            db.createNotification(NotificationType.like,
+                                widget.profileKey, message);
                           }
 
-                          var liked = await isPostLiked(
+                          var liked = await db.isPostLiked(
                               widget.postKey, widget.profileKey);
                           updateLikedImage(liked);
                           updateLikeAmountText();

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:kpss_tercih/notification_page/notification_item.dart';
 
 final firebaseRef = FirebaseDatabase.instance.reference();
 String authUserID = FirebaseAuth.instance.currentUser.uid;
@@ -161,7 +162,7 @@ void createDatabaseRecordForUser() async {
   firebaseRef.child('persons/$uId').remove();
 }
 
-void createPostOnSomeoneWall(String userId, String authorId, String content) {
+Future<void> createPostOnSomeoneWall(String userId, String authorId, String content) async{
   var id = firebaseRef.child('persons').child(userId).child('posts').push();
   id.set({'author': displayName, 'content': content, 'authorId': authorId});
 }
@@ -198,4 +199,29 @@ Future<List> getListFromDb(String child, {String userId}) async {
     });
   }
   return list;
+}
+
+Future<void> createNotification(
+    NotificationType type, String userID, String message) async {
+  DateTime datetime = DateTime.now();
+
+  var id =
+      firebaseRef.child('persons').child(userID).child('notifications').push();
+
+  id.set({
+    'type': type.toString(),
+    'from': displayName,
+    'message': message,
+    'date': datetime.toString(),
+  });
+}
+
+
+Future<Map> fetchNotifications() async {
+  DataSnapshot snapshot = await firebaseRef
+      .child('persons')
+      .child(authUserID)
+      .child('notifications')
+      .once();
+  return snapshot.value as Map;
 }

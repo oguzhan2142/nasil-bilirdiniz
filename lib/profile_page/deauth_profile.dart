@@ -2,6 +2,7 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'package:kpss_tercih/firebase/firestore.dart';
+import 'package:kpss_tercih/notification_page/notification_item.dart';
 import 'package:kpss_tercih/profile_page/editable_slidable_item.dart';
 import 'package:kpss_tercih/profile_page/person_card_widget.dart';
 import 'package:kpss_tercih/profile_page/slidable_item.dart';
@@ -27,10 +28,13 @@ class _DeauthProfileState extends State<DeauthProfile> {
   Image _profileImageWidget;
   EditableSlidableItem editableSlidableItem;
   bool floatingActionVisible = true;
+  String displayName;
 
   @override
   void initState() {
     super.initState();
+
+    displayName = widget.profileData['displayName'];
 
     if (widget.profileData['posts'] != null)
       widget._postsMap = widget.profileData['posts'];
@@ -146,7 +150,7 @@ class _DeauthProfileState extends State<DeauthProfile> {
                       ExpandablePanel(
                         controller: _expandableController,
                         header: Text(
-                          widget.profileData['displayName'],
+                          displayName,
                           style: TextStyle(
                             color: _headerColor,
                             fontWeight: FontWeight.w700,
@@ -180,8 +184,15 @@ class _DeauthProfileState extends State<DeauthProfile> {
                                             db
                                                 .addUserToFollowings(
                                                     widget.profileKey)
-                                                .whenComplete(
-                                                    () => checkFollowing());
+                                                .whenComplete(() {
+                                              checkFollowing();
+                                              String message =
+                                                  '$displayName takip etti';
+                                              db.createNotification(
+                                                  NotificationType.followed,
+                                                  widget.profileKey,
+                                                  message);
+                                            });
                                           },
                                           child: Text('Follow',
                                               style: TextStyle(
@@ -200,8 +211,15 @@ class _DeauthProfileState extends State<DeauthProfile> {
                                             db
                                                 .removeUserFromFollowings(
                                                     widget.profileKey)
-                                                .whenComplete(
-                                                    () => checkFollowing());
+                                                .whenComplete(() {
+                                              checkFollowing();
+                                              String message =
+                                                  '$displayName takipten çıktı';
+                                              db.createNotification(
+                                                  NotificationType.unfollowed,
+                                                  widget.profileKey,
+                                                  message);
+                                            });
                                           },
                                           child: Text('unFollow',
                                               style: TextStyle(

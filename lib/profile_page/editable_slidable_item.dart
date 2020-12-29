@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:kpss_tercih/firebase/firestore.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
+import 'package:kpss_tercih/firebase/firestore.dart';
+import 'package:kpss_tercih/notification_page/notification_item.dart';
 
 class EditableSlidableItem extends StatefulWidget {
   final String profileKey;
@@ -80,11 +80,17 @@ class _EditableSlidableItemState extends State<EditableSlidableItem> {
                               SizedBox(width: 20),
                               FlatButton(
                                 onPressed: () {
-                                  db.createPostOnSomeoneWall(
+                                  db
+                                      .createPostOnSomeoneWall(
                                     widget.profileKey,
                                     db.authUserID,
                                     editableController.text,
-                                  );
+                                  ).whenComplete(() {
+                                    String message =
+                                        '${db.displayName} duvarinda gonderi paylaştı';
+                                    db.createNotification(NotificationType.post,
+                                        widget.profileKey, message);
+                                  });
                                   widget.onCancel();
                                   widget.updatePostWidgets();
                                 },
