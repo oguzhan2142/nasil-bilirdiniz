@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kpss_tercih/profile_page/person_profile.dart';
 import 'firebase/database.dart' as db;
 import 'search_page/search_page.dart';
+import 'notification_page/notification.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -45,9 +46,11 @@ class _HomeState extends State<Home> {
     if (_selectedIndex == 0)
       return Search();
     else if (_selectedIndex == 1)
-      return Center(child: Text('Notification'));
-    else if (_selectedIndex == 2) return PersonProfle();
-    return null;
+      return NotificationPage();
+    else if (_selectedIndex == 2)
+      return PersonProfle();
+    else
+      return null;
   }
 
   void _onItemTapped(int value) {

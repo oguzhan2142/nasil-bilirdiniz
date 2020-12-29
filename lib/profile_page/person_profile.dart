@@ -65,11 +65,12 @@ class _PersonProfleState extends State<PersonProfle> {
     });
 
     getDownloadLink().then((value) {
-      setState(() {
-        if (value != null)
-          _profileImageWidget =
-              Image.network(value, width: _profileWidgetWidth);
-      });
+      if (this.mounted)
+        setState(() {
+          if (value != null)
+            _profileImageWidget =
+                Image.network(value, width: _profileWidgetWidth);
+        });
     });
 
     _expandableController.expanded = true;
@@ -107,14 +108,14 @@ class _PersonProfleState extends State<PersonProfle> {
                     ExpandablePanel(
                       controller: _expandableController,
                       header: Text(
-                              db.displayName,
-                              style: TextStyle(
-                                color: _headerColor,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 18,
-                                letterSpacing: 0.2,
-                              ),
-                            ),
+                        db.displayName,
+                        style: TextStyle(
+                          color: _headerColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 18,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
                       theme: ExpandableThemeData(
                         headerAlignment: ExpandablePanelHeaderAlignment.center,
                         iconColor: _headerColor,
