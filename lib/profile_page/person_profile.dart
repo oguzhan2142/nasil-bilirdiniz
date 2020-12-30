@@ -23,13 +23,15 @@ class _PersonProfleState extends State<PersonProfle> {
   List<dynamic> _followersList = List();
   List<SlidableItem> slidableItems = List();
   ExpandableController _expandableController = ExpandableController();
-  Future<dynamic> _userInfo;
   Color _headerColor = Colors.white;
   File _image;
   Image _profileImageWidget;
   final picker = ImagePicker();
-
+  TextEditingController textEditingController = TextEditingController();
   int postsAmount = 0;
+  bool isEditingDescText = false;
+  bool descEditIconVisible = true;
+  Text descTextWidget;
 
   @override
   void initState() {
@@ -37,21 +39,22 @@ class _PersonProfleState extends State<PersonProfle> {
 
     if (db.authUserID == null) Navigator.pushNamed(context, '/');
 
-    db.getListFromDb('followers').then((value) {
-      // List tempList = Utils.removeNulls(value);
+    descTextWidget = Text(
+      'Description',
+      style: TextStyle(color: Colors.white.withOpacity(0.92)),
+    );
 
+    db.getListFromDb('followers').then((value) {
       setState(() {
         if (value != null) _followersList = value;
       });
     });
 
     db.getListFromDb('followings').then((value) {
-      // List tempList = Utils.removeNulls(value);
       setState(() {
         if (value != null) _followingList = value;
       });
     });
-
 
     db.getPostsMap(userID: db.authUserID).then((value) {
       if (value == null) return;
@@ -73,7 +76,6 @@ class _PersonProfleState extends State<PersonProfle> {
       });
     });
 
-    _userInfo = db.getUserInfo('displayName');
     _expandableController.addListener(() {
       if (_expandableController.expanded)
         setState(() {
@@ -84,6 +86,11 @@ class _PersonProfleState extends State<PersonProfle> {
           _headerColor = Colors.white;
         });
     });
+
+    _profileImageWidget = Image(
+      image: AssetImage('res/user.png'),
+      width: _profileWidgetWidth,
+    );
 
     getDownloadLink().then((value) {
       if (this.mounted)
@@ -144,13 +151,9 @@ class _PersonProfleState extends State<PersonProfle> {
                       expanded: Row(
                         children: [
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              _profileImageWidget == null
-                                  ? Image(
-                                      image: AssetImage('res/user.png'),
-                                      width: _profileWidgetWidth,
-                                    )
-                                  : _profileImageWidget,
+                              _profileImageWidget,
                               GestureDetector(
                                 onTap: () async {
                                   bool isSuccessfull = await getImage();
@@ -167,17 +170,78 @@ class _PersonProfleState extends State<PersonProfle> {
                               )
                             ],
                           ),
-                          SizedBox(width: 16),
+                          SizedBox(width: 8),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                SizedBox(height: 10),
-                                Text(
-                                  'this is a long description of person.This paragraph takes asdasdasdasdasddddlonger area asdasd ',
-                                  style: TextStyle(
-                                      color: Colors.white.withOpacity(0.92)),
+                                Container(
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Expanded(
+                                        child: isEditingDescText
+                                            ? Column(
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      FlatButton(
+                                                          onPressed: () {},
+                                                          child:
+                                                              Text('yayinla')),
+                                                      FlatButton(
+                                                          onPressed: () {
+                                                            setState(() {
+                                                              isEditingDescText =
+                                                                  false;
+                                                              descEditIconVisible =
+                                                                  true;
+                                                            });
+                                                          },
+                                                          child: Text('vazgec'))
+                                                    ],
+                                                  ),
+                                                  Container(
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                          color: Colors.amber,
+                                                          width: 1),
+                                                    ),
+                                                    child: EditableText(
+                                                        controller:
+                                                            textEditingController,
+                                                        focusNode: FocusNode(),
+                                                        style: TextStyle(),
+                                                        cursorColor:
+                                                            Colors.amber,
+                                                        backgroundCursorColor:
+                                                            Colors.transparent),
+                                                  ),
+                                                ],
+                                              )
+                                            : descTextWidget,
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            textEditingController.text =
+                                                descTextWidget.data;
+                                            isEditingDescText = true;
+                                            descEditIconVisible = false;
+                                          });
+                                        },
+                                        child: Visibility(
+                                          visible: descEditIconVisible,
+                                          child: Icon(
+                                            Icons.edit,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
                                 ),
+                                SizedBox(height: 10),
                                 FlatButton(
                                   onPressed: () {
                                     FirebaseAuth.instance.signOut();
