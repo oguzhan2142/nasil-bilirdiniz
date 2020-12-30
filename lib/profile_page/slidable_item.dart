@@ -42,8 +42,12 @@ class _SlidableItemState extends State<SlidableItem> {
       width: 40,
     );
 
+    print(widget.authorId);
     getDownloadLink(uid: widget.authorId).then((value) => setState(() {
-          if (value != null) _imageWidget = Image.network(value, width: 40);
+          if (value != null)
+            setState(() {
+              _imageWidget = Image.network(value, width: 40);
+            });
         }));
 
     db.isPostLiked(widget.postKey, widget.profileKey).then((isLiked) {
@@ -136,11 +140,10 @@ class _SlidableItemState extends State<SlidableItem> {
                           if (isLiked) {
                             await db.unLikePost(
                                 widget.postKey, widget.profileKey);
-                                                            String message =
+                            String message =
                                 '${db.displayName} beğenisini kaldırdı';
                             db.createNotification(NotificationType.like,
                                 widget.profileKey, message);
-
                           } else {
                             await db.likePost(
                                 widget.postKey, widget.profileKey);

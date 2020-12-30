@@ -162,7 +162,8 @@ void createDatabaseRecordForUser() async {
   firebaseRef.child('persons/$uId').remove();
 }
 
-Future<void> createPostOnSomeoneWall(String userId, String authorId, String content) async{
+Future<void> createPostOnSomeoneWall(
+    String userId, String authorId, String content) async {
   var id = firebaseRef.child('persons').child(userId).child('posts').push();
   id.set({'author': displayName, 'content': content, 'authorId': authorId});
 }
@@ -216,6 +217,22 @@ Future<void> createNotification(
   });
 }
 
+void removeAllNotifications() {
+  DatabaseReference ref =
+      firebaseRef.child('persons').child(authUserID).child('notifications');
+
+  ref.remove();
+}
+
+void removeNotification(String notificationID) {
+  DatabaseReference ref = firebaseRef
+      .child('persons')
+      .child(authUserID)
+      .child('notifications')
+      .child(notificationID);
+
+  ref.remove();
+}
 
 Future<Map> fetchNotifications() async {
   DataSnapshot snapshot = await firebaseRef

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'package:kpss_tercih/notification_page/notification_item.dart';
+import 'package:kpss_tercih/profile_page/slidable_item.dart';
 
 class NotificationPage extends StatefulWidget {
   @override
@@ -14,11 +15,16 @@ class _NotificationPageState extends State<NotificationPage> {
   void initState() {
     super.initState();
 
+    updateNotifications();
+  }
+
+  void updateNotifications() {
     db.fetchNotifications().then((notificationMap) {
+      if (notificationMap == null) return;
       List<Widget> temp = List();
 
       DateTime nowDateTime = DateTime.now();
-      notificationMap.values.forEach((notification) {
+      notificationMap.forEach((key, notification) {
         NotificationType type;
         if (notification['type'] == NotificationType.post.toString())
           type = NotificationType.post;
@@ -26,6 +32,8 @@ class _NotificationPageState extends State<NotificationPage> {
           type = NotificationType.like;
         else if (notification['type'] == NotificationType.followed.toString())
           type = NotificationType.followed;
+        else if (notification['type'] == NotificationType.unfollowed.toString())
+          type = NotificationType.unfollowed;
 
         DateTime dateTime = DateTime.parse(notification['date']);
 
@@ -38,15 +46,28 @@ class _NotificationPageState extends State<NotificationPage> {
           date = '${diff.inHours} saat önce';
 
         temp.add(NotificationItem(
+          notificationID: key,
           type: type,
           date: date,
           message: notification['message'],
+          removeItemFromList: removeNotification,
         ));
       });
 
       setState(() {
         notificationWidgetsList = temp;
       });
+    });
+  }
+
+  void removeNotification(NotificationItem item) {
+    List<Widget> temp = List();
+    temp.addAll(notificationWidgetsList);
+
+    temp.remove(item);
+
+    setState(() {
+      notificationWidgetsList = temp;
     });
   }
 
@@ -79,7 +100,14 @@ class _NotificationPageState extends State<NotificationPage> {
                 splashColor: Colors.white,
                 disabledColor: Colors.white,
                 child: FlatButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      db.removeAllNotifications();
+                      notificationWidgetsList = null;
+
+                      setState(() {
+                        notificationWidgetsList = List();
+                      });
+                    },
                     child: Text(
                       'Clear All',
                       style: TextStyle(color: Colors.amber.withAlpha(160)),

@@ -7,7 +7,6 @@ import 'package:kpss_tercih/login_page/login.dart';
 import 'package:kpss_tercih/login_page/singup.dart';
 import 'package:provider/provider.dart';
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -49,6 +48,8 @@ class AuthenticationWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final firebaseuser = context.watch<User>();
+
+
     if (firebaseuser != null)
       return Home();
     else

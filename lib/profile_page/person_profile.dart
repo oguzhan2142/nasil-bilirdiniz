@@ -18,9 +18,10 @@ class PersonProfle extends StatefulWidget {
 
 class _PersonProfleState extends State<PersonProfle> {
   double _profileWidgetWidth = 80;
-  Map _postList = Map();
+
   List<dynamic> _followingList = List();
   List<dynamic> _followersList = List();
+  List<SlidableItem> slidableItems = List();
   ExpandableController _expandableController = ExpandableController();
   Future<dynamic> _userInfo;
   Color _headerColor = Colors.white;
@@ -28,9 +29,14 @@ class _PersonProfleState extends State<PersonProfle> {
   Image _profileImageWidget;
   final picker = ImagePicker();
 
+  int postsAmount = 0;
+
   @override
   void initState() {
     super.initState();
+
+    if (db.authUserID == null) Navigator.pushNamed(context, '/');
+
     db.getListFromDb('followers').then((value) {
       // List tempList = Utils.removeNulls(value);
 
@@ -46,9 +52,24 @@ class _PersonProfleState extends State<PersonProfle> {
       });
     });
 
-    db.getPostsMap().then((value) {
+
+    db.getPostsMap(userID: db.authUserID).then((value) {
+      if (value == null) return;
+      value.entries.forEach((element) {
+        slidableItems.add(SlidableItem(
+          profileKey: element.value['authorId'],
+          postKey: element.key,
+          header: element.value['author'],
+          content: element.value['content'],
+        ));
+      });
+
+      List<SlidableItem> temp = List();
+      temp.addAll(slidableItems);
+      slidableItems = null;
       setState(() {
-        if (value != null) _postList = value;
+        postsAmount = value.length;
+        slidableItems = temp;
       });
     });
 
@@ -190,7 +211,7 @@ class _PersonProfleState extends State<PersonProfle> {
                       child: Column(
                         children: [
                           Text(
-                            _postList.length.toString(),
+                            postsAmount.toString(),
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold),
                           ),
@@ -226,12 +247,8 @@ class _PersonProfleState extends State<PersonProfle> {
                 ),
                 body: TabBarView(children: [
                   ListView(
-                      children: _postList.values
-                          .map((e) => SlidableItem(
-                                header: e['author'],
-                                content: e['content'],
-                              ))
-                          .toList()),
+                    children: slidableItems,
+                  ),
                   ListView(
                     children: _followersList
                         .map((e) => PersonCard(personUid: e))

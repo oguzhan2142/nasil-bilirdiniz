@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:kpss_tercih/firebase/database.dart' as db;
 
 enum NotificationType { like, followed, unfollowed, post }
 
@@ -7,8 +8,16 @@ class NotificationItem extends StatelessWidget {
   final NotificationType type;
   final String message;
   final String date;
+  final String notificationID;
+  final Function removeItemFromList;
 
-  NotificationItem({Key key, this.type, this.message, this.date})
+  NotificationItem(
+      {Key key,
+      this.notificationID,
+      this.type,
+      this.message,
+      this.date,
+      this.removeItemFromList})
       : super(key: key);
 
   Image createIcon(NotificationType type) {
@@ -68,7 +77,10 @@ class NotificationItem extends StatelessWidget {
           actionCount: 1,
           builder: (context, index, animation, step) {
             return RawMaterialButton(
-              onPressed: () {},
+              onPressed: () {
+                removeItemFromList(this);
+                db.removeNotification(notificationID);
+              },
               elevation: step == SlidableRenderingMode.slide
                   ? 10 * animation.value
                   : 10,
