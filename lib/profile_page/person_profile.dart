@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'package:kpss_tercih/firebase/firestore.dart';
 import 'package:kpss_tercih/profile_page/person_card_widget.dart';
+import 'package:kpss_tercih/profile_page/post_choise_button.dart';
 import 'package:kpss_tercih/profile_page/slidable_item.dart';
 
 class PersonProfle extends StatefulWidget {
@@ -184,23 +185,30 @@ class _PersonProfleState extends State<PersonProfle> {
                                             ? Column(
                                                 children: [
                                                   Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.end,
                                                     children: [
-                                                      FlatButton(
-                                                          onPressed: () {},
-                                                          child:
-                                                              Text('yayinla')),
-                                                      FlatButton(
-                                                          onPressed: () {
-                                                            setState(() {
-                                                              isEditingDescText =
-                                                                  false;
-                                                              descEditIconVisible =
-                                                                  true;
-                                                            });
-                                                          },
-                                                          child: Text('vazgec'))
+                                                      ChoiseButton(
+                                                        text: 'Yayınla',
+                                                        color: Colors.green,
+                                                        onClick: () {},
+                                                      ),
+                                                      SizedBox(width: 10),
+                                                      ChoiseButton(
+                                                        text: 'Vazgeç',
+                                                        color: Colors.red,
+                                                        onClick: () {
+                                                          setState(() {
+                                                            isEditingDescText =
+                                                                false;
+                                                            descEditIconVisible =
+                                                                true;
+                                                          });
+                                                        },
+                                                      )
                                                     ],
                                                   ),
+                                                  SizedBox(height: 4),
                                                   Container(
                                                     decoration: BoxDecoration(
                                                       border: Border.all(

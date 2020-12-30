@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'package:kpss_tercih/firebase/firestore.dart';
 import 'package:kpss_tercih/notification_page/notification_item.dart';
+import 'package:kpss_tercih/profile_page/post_choise_button.dart';
 
 class EditableSlidableItem extends StatefulWidget {
   final String profileKey;
@@ -78,14 +79,15 @@ class _EditableSlidableItemState extends State<EditableSlidableItem> {
                                     color: Colors.amber),
                               ),
                               SizedBox(width: 20),
-                              FlatButton(
-                                onPressed: () {
+                              ChoiseButton(
+                                onClick: () {
                                   db
                                       .createPostOnSomeoneWall(
                                     widget.profileKey,
                                     db.authUserID,
                                     editableController.text,
-                                  ).whenComplete(() {
+                                  )
+                                      .whenComplete(() {
                                     String message =
                                         '${db.displayName} duvarinda gonderi paylaştı';
                                     db.createNotification(NotificationType.post,
@@ -94,30 +96,16 @@ class _EditableSlidableItemState extends State<EditableSlidableItem> {
                                   widget.onCancel();
                                   widget.updatePostWidgets();
                                 },
-                                splashColor: Colors.amber,
-                                child: Text('Yayınla',
-                                    style: TextStyle(
-                                      color: Colors.green,
-                                      fontSize: 13,
-                                    )),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
-                                  side: BorderSide(color: Colors.green),
-                                ),
+                                text: 'Yayınla',
+                                color: Colors.green,
                               ),
                               SizedBox(width: 5),
-                              FlatButton(
-                                onPressed: widget.onCancel,
-                                child: Text('Vazgeç',
-                                    style: TextStyle(
-                                      color: Colors.red,
-                                      fontSize: 13,
-                                    )),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
-                                  side: BorderSide(color: Colors.red),
-                                ),
-                              ),
+                              ChoiseButton(
+                                onClick: widget.onCancel,
+                                text: 'Vazgeç',
+                                color: Colors.red,
+
+                              )
                             ],
                           ),
                           SizedBox(
