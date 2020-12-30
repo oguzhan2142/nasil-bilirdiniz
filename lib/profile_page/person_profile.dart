@@ -31,8 +31,8 @@ class _PersonProfleState extends State<PersonProfle> {
   TextEditingController textEditingController = TextEditingController();
   int postsAmount = 0;
   bool isEditingDescText = false;
-  bool descEditIconVisible = true;
-  Text descTextWidget;
+  bool isBiographyWidgetVisible = true;
+  String biographyText = '';
 
   @override
   void initState() {
@@ -40,10 +40,7 @@ class _PersonProfleState extends State<PersonProfle> {
 
     if (db.authUserID == null) Navigator.pushNamed(context, '/');
 
-    descTextWidget = Text(
-      'Description',
-      style: TextStyle(color: Colors.white.withOpacity(0.92)),
-    );
+    updateBiographyText();
 
     db.getListFromDb('followers').then((value) {
       setState(() {
@@ -103,6 +100,15 @@ class _PersonProfleState extends State<PersonProfle> {
     });
 
     _expandableController.expanded = true;
+  }
+
+  void updateBiographyText() {
+    db.getUserInfo('biography').then((value) {
+      if (value != null)
+        setState(() {
+          biographyText = value;
+        });
+    });
   }
 
   Future<bool> getImage() async {
@@ -191,7 +197,17 @@ class _PersonProfleState extends State<PersonProfle> {
                                                       ChoiseButton(
                                                         text: 'Yayınla',
                                                         color: Colors.green,
-                                                        onClick: () {},
+                                                        onClick: () {
+                                                          db
+                                                              .updateBiography(
+                                                                  textEditingController
+                                                                      .text)
+                                                              .whenComplete(() {
+                                                            updateBiographyText();
+                                                            setEditingMode(
+                                                                false);
+                                                          });
+                                                        },
                                                       ),
                                                       SizedBox(width: 10),
                                                       ChoiseButton(
@@ -199,10 +215,8 @@ class _PersonProfleState extends State<PersonProfle> {
                                                         color: Colors.red,
                                                         onClick: () {
                                                           setState(() {
-                                                            isEditingDescText =
-                                                                false;
-                                                            descEditIconVisible =
-                                                                true;
+                                                            setEditingMode(
+                                                                false);
                                                           });
                                                         },
                                                       )
@@ -210,6 +224,7 @@ class _PersonProfleState extends State<PersonProfle> {
                                                   ),
                                                   SizedBox(height: 4),
                                                   Container(
+                                                    padding: EdgeInsets.all(6),
                                                     decoration: BoxDecoration(
                                                       border: Border.all(
                                                           color: Colors.amber,
@@ -227,19 +242,19 @@ class _PersonProfleState extends State<PersonProfle> {
                                                   ),
                                                 ],
                                               )
-                                            : descTextWidget,
+                                            : Text(
+                                                biographyText,
+                                                style: TextStyle(
+                                                    color: Colors.white
+                                                        .withOpacity(0.92)),
+                                              ),
                                       ),
                                       GestureDetector(
                                         onTap: () {
-                                          setState(() {
-                                            textEditingController.text =
-                                                descTextWidget.data;
-                                            isEditingDescText = true;
-                                            descEditIconVisible = false;
-                                          });
+                                          setEditingMode(true);
                                         },
                                         child: Visibility(
-                                          visible: descEditIconVisible,
+                                          visible: isBiographyWidgetVisible,
                                           child: Icon(
                                             Icons.edit,
                                             color: Colors.white,
@@ -338,5 +353,13 @@ class _PersonProfleState extends State<PersonProfle> {
         ),
       ),
     );
+  }
+
+  void setEditingMode(bool isEditing) {
+    setState(() {
+      textEditingController.text = biographyText;
+      isEditingDescText = isEditing;
+      isBiographyWidgetVisible = !isEditing;
+    });
   }
 }

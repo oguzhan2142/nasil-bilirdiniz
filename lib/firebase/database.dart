@@ -174,6 +174,11 @@ void postData(dynamic data, String child) {
   x.set(data);
 }
 
+Future<void> updateBiography(String biography) async {
+  var ref = firebaseRef.child('persons').child(authUserID);
+  ref.update({'biography': biography});
+}
+
 Future<Map> getPostsMap({String userID}) async {
   String id = userID == null ? authUserID : userID;
 
