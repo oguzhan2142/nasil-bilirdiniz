@@ -79,7 +79,7 @@ class _DeauthProfileState extends State<DeauthProfile> {
     List<Widget> widgets = List();
 
     Map postMap = await db.getPostsMap(userID: widget.profileKey);
-
+    if (postMap == null) return;
     postMap.entries.forEach((element) {
       widgets.add(SlidableItem(
         profileKey: widget.profileKey,

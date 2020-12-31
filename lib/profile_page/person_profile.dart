@@ -269,8 +269,8 @@ class _PersonProfleState extends State<PersonProfle> {
                                   onPressed: () {
                                     FirebaseAuth.instance.signOut();
                                   },
-                                  child: Text('Log Out'),
-                                  color: Colors.green,
+                                  child: Text('Çıkış Yap'),
+                                  color: Colors.amber,
                                 )
                               ],
                             ),

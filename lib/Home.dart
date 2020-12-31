@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kpss_tercih/profile.dart';
 import 'package:kpss_tercih/profile_page/person_profile.dart';
 import 'firebase/database.dart' as db;
 import 'search_page/search_page.dart';
@@ -48,7 +49,8 @@ class _HomeState extends State<Home> {
     else if (_selectedIndex == 1)
       return NotificationPage();
     else if (_selectedIndex == 2)
-      return PersonProfle();
+      return Profile();
+      // return PersonProfle();
     else
       return null;
   }
