@@ -196,7 +196,7 @@ class _PersonProfleState extends State<PersonProfle> {
                                                     children: [
                                                       ChoiseButton(
                                                         text: 'Yayınla',
-                                                        color: Colors.green,
+                                                        borderColor: Colors.green,
                                                         onClick: () {
                                                           db
                                                               .updateBiography(
@@ -212,7 +212,7 @@ class _PersonProfleState extends State<PersonProfle> {
                                                       SizedBox(width: 10),
                                                       ChoiseButton(
                                                         text: 'Vazgeç',
-                                                        color: Colors.red,
+                                                        borderColor: Colors.red,
                                                         onClick: () {
                                                           setState(() {
                                                             setEditingMode(

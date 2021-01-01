@@ -54,9 +54,10 @@ class _NotificationPageState extends State<NotificationPage> {
         ));
       });
 
-      setState(() {
-        notificationWidgetsList = temp;
-      });
+      if (mounted)
+        setState(() {
+          notificationWidgetsList = temp;
+        });
     });
   }
 

@@ -97,14 +97,15 @@ class _EditableSlidableItemState extends State<EditableSlidableItem> {
                                   widget.updatePostWidgets();
                                 },
                                 text: 'Yayınla',
-                                color: Colors.green,
+                                borderColor: Colors.green,
+                                textColor: Colors.green,
                               ),
                               SizedBox(width: 5),
                               ChoiseButton(
                                 onClick: widget.onCancel,
                                 text: 'Vazgeç',
-                                color: Colors.red,
-
+                                borderColor: Colors.red,
+                                textColor: Colors.red,
                               )
                             ],
                           ),

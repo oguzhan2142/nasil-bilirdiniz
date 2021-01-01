@@ -1,7 +1,14 @@
+import 'dart:io';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:kpss_tercih/post_widget.dart';
-import 'package:kpss_tercih/profile_page/slidable_item.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
+import 'package:kpss_tercih/firebase/firestore.dart' as store;
+
+import 'profile_page/post_choise_button.dart';
 
 class Profile extends StatefulWidget {
   bool isAuthProfile;
@@ -14,6 +21,19 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  int followingCount = 0;
+  int followersCount = 0;
+  int postCount = 0;
+  Image profileImage;
+  final picker = ImagePicker();
+  File loadedImageFile;
+  bool isEditingDescText = false;
+  bool isBiographyWidgetVisible = true;
+  String biographyText = '';
+  TextEditingController textEditingController = TextEditingController();
+
+  List<Widget> postWidgets = List();
+
   List<Widget> createPostWidgetList(Map postMap) {
     List<Widget> postWidgets = List();
     var divider = Divider(color: Colors.amber, height: 50, thickness: 0.8);
@@ -21,21 +41,99 @@ class _ProfileState extends State<Profile> {
 
     postMap.forEach((key, value) {
       postWidgets.add(PostWidget(
-          authorId: value['authorId'],
-          postOwnerId: widget.deauthProfileId == null
-              ? db.authUserID
-              : widget.deauthProfileId,
-          postKey: key,
-          author: value['author'],
-          date: value['date'],
-          content: value['content']));
+        authorId: value['authorId'],
+        postOwnerId: widget.deauthProfileId == null
+            ? db.authUserID
+            : widget.deauthProfileId,
+        postKey: key,
+        author: value['author'],
+        date: value['date'],
+        content: value['content'],
+        isAuthProfile: widget.isAuthProfile,
+      ));
 
       postWidgets.add(divider);
     });
 
-    print(postMap);
-
     return postWidgets;
+  }
+
+  @override
+  initState() {
+    super.initState();
+    db.getListFromDb('followers').then((value) {
+      setState(() {
+        if (value != null) followersCount = value.length;
+      });
+    });
+
+    db.getListFromDb('followings').then((value) {
+      setState(() {
+        if (value != null) followingCount = value.length;
+      });
+    });
+
+    db.getPostsMap().then((postMap) {
+      List<Widget> temp = createPostWidgetList(postMap);
+
+      setState(() {
+        postWidgets = temp;
+        postCount = postMap.length;
+      });
+      temp = null;
+    });
+
+    profileImage = Image.asset('res/user.png', width: 80);
+    initProfileImage();
+
+    db.getUserInfo('biography').then((value) {
+      setState(() {
+        biographyText = value;
+      });
+    });
+  }
+
+  Future initProfileImage() async {
+    String id =
+        widget.deauthProfileId == null ? db.authUserID : widget.deauthProfileId;
+
+    String imageUrl = await store.getDownloadLink(uid: id);
+    if (imageUrl != null) {
+      Image temp = Image.network(imageUrl, width: 80);
+      setState(() {
+        profileImage = temp;
+      });
+      temp = null;
+    }
+  }
+
+  void updateBiographyText() {
+    db.getUserInfo('biography').then((value) {
+      if (value != null)
+        setState(() {
+          biographyText = value;
+        });
+    });
+  }
+
+  Future<bool> getImage() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      loadedImageFile = File(pickedFile.path);
+      setState(() {
+        profileImage = Image.file(loadedImageFile, width: 80);
+      });
+    }
+    return pickedFile != null;
+  }
+
+  void setEditingMode(bool isEditing) {
+    setState(() {
+      textEditingController.text = biographyText;
+      isEditingDescText = isEditing;
+      isBiographyWidgetVisible = !isEditing;
+    });
   }
 
   @override
@@ -93,17 +191,44 @@ class _ProfileState extends State<Profile> {
                                 borderRadius: BorderRadius.circular(24)),
                             color: Colors.grey[200],
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 40, vertical: 18),
+                              padding: const EdgeInsets.symmetric(vertical: 18),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(360),
-                                    child: Image.asset(
-                                      'res/user.png',
-                                      width: 80,
-                                    ),
+                                  Stack(
+                                    overflow: Overflow.visible,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(360),
+                                        child: profileImage,
+                                      ),
+                                      Positioned.fill(
+                                        child: Align(
+                                          alignment: Alignment.bottomRight,
+                                          child: GestureDetector(
+                                            onTap: () async {
+                                              bool isSuccessfull =
+                                                  await getImage();
+
+                                              if (isSuccessfull) {
+                                                Reference ref = await store
+                                                    .searchReference();
+                                                if (ref != null)
+                                                  await ref.delete();
+                                                store.uploadFile(
+                                                    loadedImageFile);
+                                              }
+                                            },
+                                            child: Icon(
+                                              Icons.edit,
+                                              color: Colors.amber,
+                                              size: 35,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   SizedBox(height: 10),
                                   Text(
@@ -114,20 +239,138 @@ class _ProfileState extends State<Profile> {
                                     ),
                                   ),
                                   SizedBox(height: 10),
-                                  FutureBuilder(
-                                    future: db.getUserInfo('biography'),
-                                    builder: (BuildContext context,
-                                        AsyncSnapshot<dynamic> snapshot) {
-                                      if (snapshot.hasData)
-                                        return Text(
-                                          snapshot.data,
-                                          style: TextStyle(
-                                            fontSize: 12,
+                                  Container(
+                                    margin: EdgeInsets.symmetric(horizontal: 20),
+                                    child: isEditingDescText
+                                        ? Column(
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  ChoiseButton(
+                                                    text: 'Yayınla',
+                                                    borderColor: Colors.green,
+                                                    textColor: Colors.black87,
+                                                    onClick: () {
+                                                      db
+                                                          .updateBiography(
+                                                              textEditingController
+                                                                  .text)
+                                                          .whenComplete(() {
+                                                        updateBiographyText();
+                                                        setEditingMode(false);
+                                                      });
+                                                    },
+                                                  ),
+                                                  SizedBox(width: 10),
+                                                  ChoiseButton(
+                                                    text: 'Vazgeç',
+                                                    borderColor: Colors.red,
+                                                    textColor: Colors.black87,
+                                                    onClick: () {
+                                                      setState(() {
+                                                        setEditingMode(false);
+                                                      });
+                                                    },
+                                                  )
+                                                ],
+                                              ),
+                                              SizedBox(height: 4),
+                                              Container(
+                                                padding: EdgeInsets.all(6),
+                                                decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                      color: Colors.black87,
+                                                      width: 1),
+                                                ),
+                                                child: EditableText(
+                                                    controller:
+                                                        textEditingController,
+                                                    focusNode: FocusNode(),
+                                                    style: TextStyle(),
+                                                    cursorColor: Colors.amber,
+                                                    backgroundCursorColor:
+                                                        Colors.transparent),
+                                              ),
+                                            ],
+                                          )
+                                        : RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                  text: biographyText,
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                                WidgetSpan(
+                                                  child: GestureDetector(
+                                                    onTap: () {
+                                                      setEditingMode(true);
+                                                    },
+                                                    child: Icon(
+                                                      Icons.edit,
+                                                      size: 14,
+                                                      color: Colors.amber,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        );
-                                      else
-                                        return Container();
-                                    },
+                                  ),
+                                  SizedBox(height: 15),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: 90,
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              postCount.toString(),
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Text('Post',
+                                                style: TextStyle(fontSize: 16)),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 90,
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              followingCount.toString(),
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Text('Takip Edilen',
+                                                style: TextStyle(fontSize: 16)),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 90,
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              followersCount.toString(),
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Text('Takipçi',
+                                                style: TextStyle(fontSize: 16)),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   SizedBox(height: 15),
                                   if (!widget.isAuthProfile)
@@ -152,23 +395,34 @@ class _ProfileState extends State<Profile> {
                                           borderRadius:
                                               BorderRadius.circular(12)),
                                     )
+                                  else
+                                    FlatButton(
+                                      onPressed: () {
+                                        FirebaseAuth.instance.signOut();
+                                      },
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 24, vertical: 12),
+                                      child: Text(
+                                        'Çıkış Yap',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.amber,
+                                        ),
+                                      ),
+                                      color: Colors.black87,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12)),
+                                    )
                                 ],
                               ),
                             ),
                           ),
                         ),
-                        SizedBox(height: 30),
-                        FutureBuilder(
-                          future: db.getPostsMap(),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<dynamic> snapshot) {
-                            if (snapshot.hasData)
-                              return Column(
-                                children: createPostWidgetList(snapshot.data),
-                              );
-                            else
-                              return Container();
-                          },
+                        SizedBox(height: 15),
+                        Column(
+                          children: postWidgets,
                         )
                       ],
                     ),

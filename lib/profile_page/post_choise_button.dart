@@ -4,9 +4,12 @@ import 'package:kpss_tercih/firebase/database.dart' as db;
 class ChoiseButton extends StatelessWidget {
   final Function onClick;
   final String text;
-  final Color color;
+  final Color borderColor;
+  final Color textColor;
 
-  const ChoiseButton({Key key, this.onClick, this.text,this.color}) : super(key: key);
+  const ChoiseButton(
+      {Key key, this.textColor, this.onClick, this.text, this.borderColor})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,12 +18,12 @@ class ChoiseButton extends StatelessWidget {
       splashColor: Colors.amber,
       child: Text(text,
           style: TextStyle(
-            color: color,
+            color: textColor,
             fontSize: 13,
           )),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(4),
-        side: BorderSide(color: color),
+        side: BorderSide(color: borderColor),
       ),
     );
   }

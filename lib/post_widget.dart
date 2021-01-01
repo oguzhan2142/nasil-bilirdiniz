@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
-import 'package:kpss_tercih/like_image_widget.dart';
-
 import 'notification_page/notification_item.dart';
-import 'package:kpss_tercih/Resources.dart' as Res;
 
 class PostWidget extends StatefulWidget {
   final String author;
@@ -14,16 +11,17 @@ class PostWidget extends StatefulWidget {
   final String postOwnerId;
   final String authorId;
   final String date;
-
-  PostWidget(
-      {Key key,
-      @required this.authorId,
-      @required this.postOwnerId,
-      @required this.postKey,
-      @required this.author,
-      @required this.date,
-      @required this.content})
-      : super(key: key);
+  final bool isAuthProfile;
+  PostWidget({
+    Key key,
+    @required this.authorId,
+    @required this.postOwnerId,
+    @required this.postKey,
+    @required this.author,
+    @required this.date,
+    @required this.content,
+    @required this.isAuthProfile,
+  }) : super(key: key);
 
   @override
   _PostWidgetState createState() => _PostWidgetState();
@@ -45,7 +43,7 @@ class _PostWidgetState extends State<PostWidget> {
   void updateCurrentImagePath() {
     db.isPostLiked(widget.postKey, widget.postOwnerId).then((value) {
       setState(() {
-        currentImagePath = value ? Res.liked : Res.unliked;
+        currentImagePath = value ? 'res/heart1.png' : 'res/heart2.png';
       });
     });
   }
@@ -56,6 +54,12 @@ class _PostWidgetState extends State<PostWidget> {
         likeAmount = value;
       });
     });
+  }
+
+  String getFormattedDate() {
+    DateTime dateTime = DateTime.parse(widget.date);
+
+    return '${dateTime.day}.${dateTime.month}.${dateTime.year}  ${dateTime.hour}:${dateTime.minute}';
   }
 
   like() async {
@@ -96,7 +100,7 @@ class _PostWidgetState extends State<PostWidget> {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             children: [
               Text(
-                widget.date,
+                getFormattedDate(),
                 style: TextStyle(
                   color: Colors.white70,
                   fontSize: 13,
@@ -131,9 +135,9 @@ class _PostWidgetState extends State<PostWidget> {
         ],
       ),
       actionPane: SlidableBehindActionPane(),
-      actionExtentRatio: 0.2,
+      actionExtentRatio: 0.25,
       secondaryActionDelegate: SlideActionBuilderDelegate(
-          actionCount: 2,
+          actionCount: widget.isAuthProfile ? 1 : 2,
           builder: (context, index, animation, step) {
             if (index == 0)
               return RawMaterialButton(
@@ -145,7 +149,7 @@ class _PostWidgetState extends State<PostWidget> {
                     ? Colors.red.withOpacity(animation.value)
                     : Colors.red,
                 child: Image.asset(
-                  Res.share,
+                  'res/share.png',
                   width: step == SlidableRenderingMode.slide
                       ? 50 * animation.value
                       : 50,
@@ -153,7 +157,7 @@ class _PostWidgetState extends State<PostWidget> {
                 padding: EdgeInsets.all(15.0),
                 shape: CircleBorder(),
               );
-            else
+            else if(index == 1 && !widget.isAuthProfile)
               return RawMaterialButton(
                 onPressed: () {
                   like();
