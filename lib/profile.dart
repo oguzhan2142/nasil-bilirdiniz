@@ -11,8 +11,8 @@ import 'package:kpss_tercih/firebase/firestore.dart' as store;
 import 'profile_page/post_choise_button.dart';
 
 class Profile extends StatefulWidget {
-  bool isAuthProfile;
-  String deauthProfileId;
+  final bool isAuthProfile;
+  final String deauthProfileId;
 
   Profile({Key key, @required this.isAuthProfile, this.deauthProfileId})
       : super(key: key);
@@ -204,30 +204,33 @@ class _ProfileState extends State<Profile> {
                                         child: profileImage,
                                       ),
                                       Positioned.fill(
-                                        child: Align(
-                                          alignment: Alignment.bottomRight,
-                                          child: GestureDetector(
-                                            onTap: () async {
-                                              bool isSuccessfull =
-                                                  await getImage();
+                                        child: widget.isAuthProfile
+                                            ? Align(
+                                                alignment:
+                                                    Alignment.bottomRight,
+                                                child: GestureDetector(
+                                                  onTap: () async {
+                                                    bool isSuccessfull =
+                                                        await getImage();
 
-                                              if (isSuccessfull) {
-                                                Reference ref = await store
-                                                    .searchReference();
-                                                if (ref != null)
-                                                  await ref.delete();
-                                                store.uploadFile(
-                                                    loadedImageFile);
-                                              }
-                                            },
-                                            child: Icon(
-                                              Icons.edit,
-                                              color: Colors.amber,
-                                              size: 35,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                                    if (isSuccessfull) {
+                                                      Reference ref = await store
+                                                          .searchReference();
+                                                      if (ref != null)
+                                                        await ref.delete();
+                                                      store.uploadFile(
+                                                          loadedImageFile);
+                                                    }
+                                                  },
+                                                  child: Icon(
+                                                    Icons.edit,
+                                                    color: Colors.amber,
+                                                    size: 35,
+                                                  ),
+                                                ),
+                                              )
+                                            : Container(),
+                                      )
                                     ],
                                   ),
                                   SizedBox(height: 10),
@@ -240,8 +243,10 @@ class _ProfileState extends State<Profile> {
                                   ),
                                   SizedBox(height: 10),
                                   Container(
-                                    margin: EdgeInsets.symmetric(horizontal: 20),
-                                    child: isEditingDescText
+                                    margin:
+                                        EdgeInsets.symmetric(horizontal: 50),
+                                    child: isEditingDescText &&
+                                            widget.isAuthProfile
                                         ? Column(
                                             children: [
                                               Row(
@@ -305,18 +310,22 @@ class _ProfileState extends State<Profile> {
                                                     color: Colors.black,
                                                   ),
                                                 ),
-                                                WidgetSpan(
-                                                  child: GestureDetector(
-                                                    onTap: () {
-                                                      setEditingMode(true);
-                                                    },
-                                                    child: Icon(
-                                                      Icons.edit,
-                                                      size: 14,
-                                                      color: Colors.amber,
-                                                    ),
-                                                  ),
-                                                ),
+                                                widget.isAuthProfile
+                                                    ? WidgetSpan(
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            setEditingMode(
+                                                                true);
+                                                          },
+                                                          child: Icon(
+                                                            Icons.edit,
+                                                            size: 14,
+                                                            color: Colors.amber,
+                                                          ),
+                                                        ),
+                                                      )
+                                                    : WidgetSpan(
+                                                        child: Container())
                                               ],
                                             ),
                                           ),
