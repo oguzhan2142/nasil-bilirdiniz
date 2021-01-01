@@ -49,7 +49,7 @@ class _HomeState extends State<Home> {
     else if (_selectedIndex == 1)
       return NotificationPage();
     else if (_selectedIndex == 2)
-      return Profile();
+      return Profile(isAuthProfile: false,);
       // return PersonProfle();
     else
       return null;

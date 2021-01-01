@@ -1,25 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:kpss_tercih/post_widget.dart';
 import 'package:kpss_tercih/profile_page/slidable_item.dart';
+import 'package:kpss_tercih/firebase/database.dart' as db;
 
 class Profile extends StatefulWidget {
+  bool isAuthProfile;
+  String deauthProfileId;
+
+  Profile({Key key, @required this.isAuthProfile, this.deauthProfileId})
+      : super(key: key);
   @override
   _ProfileState createState() => _ProfileState();
 }
 
 class _ProfileState extends State<Profile> {
-  List<Widget> createPostWidgetList() {
+  List<Widget> createPostWidgetList(Map postMap) {
     List<Widget> postWidgets = List();
+    var divider = Divider(color: Colors.amber, height: 50, thickness: 0.8);
+    postWidgets.add(divider);
 
-    postWidgets.add(Divider(color: Colors.amber, height: 50, thickness: 0.8));
-    postWidgets.add(PostWidget());
-    postWidgets.add(Divider(color: Colors.amber, height: 50, thickness: 0.8));
-    postWidgets.add(PostWidget());
-    postWidgets.add(Divider(color: Colors.amber, height: 50, thickness: 0.8));
-    postWidgets.add(PostWidget());
-    postWidgets.add(Divider(color: Colors.amber, height: 50, thickness: 0.8));
-    postWidgets.add(PostWidget());
-    postWidgets.add(Divider(color: Colors.amber, height: 50, thickness: 0.8));
+    postMap.forEach((key, value) {
+      postWidgets.add(PostWidget(
+          authorId: value['authorId'],
+          postOwnerId: widget.deauthProfileId == null
+              ? db.authUserID
+              : widget.deauthProfileId,
+          postKey: key,
+          author: value['author'],
+          date: value['date'],
+          content: value['content']));
+
+      postWidgets.add(divider);
+    });
+
+    print(postMap);
 
     return postWidgets;
   }
@@ -56,7 +70,7 @@ class _ProfileState extends State<Profile> {
                           children: [
                             Icon(Icons.menu),
                             Text(
-                              'Profile',
+                              'Profil',
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w800,
@@ -69,61 +83,93 @@ class _ProfileState extends State<Profile> {
                           ],
                         ),
                         SizedBox(height: 20),
-                        Card(
-                          elevation: 22,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24)),
-                          color: Colors.grey[200],
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 40, vertical: 18),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(360),
-                                  child: Image.asset(
-                                    'res/user.png',
-                                    width: 80,
-                                  ),
-                                ),
-                                SizedBox(height: 10),
-                                Text(
-                                  'Kullanici Adi',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                SizedBox(height: 10),
-                                Text(
-                                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel dui odio. Cras f',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                SizedBox(height: 15),
-                                FlatButton(
-                                  onPressed: () {},
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 24, vertical: 12),
-                                  child: Text(
-                                    'Takip Et',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: MediaQuery.of(context).size.width,
+                          ),
+                          child: Card(
+                            elevation: 22,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24)),
+                            color: Colors.grey[200],
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 40, vertical: 18),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(360),
+                                    child: Image.asset(
+                                      'res/user.png',
+                                      width: 80,
                                     ),
                                   ),
-                                  color: Colors.amber,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12)),
-                                )
-                              ],
+                                  SizedBox(height: 10),
+                                  Text(
+                                    db.displayName,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  SizedBox(height: 10),
+                                  FutureBuilder(
+                                    future: db.getUserInfo('biography'),
+                                    builder: (BuildContext context,
+                                        AsyncSnapshot<dynamic> snapshot) {
+                                      if (snapshot.hasData)
+                                        return Text(
+                                          snapshot.data,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                          ),
+                                        );
+                                      else
+                                        return Container();
+                                    },
+                                  ),
+                                  SizedBox(height: 15),
+                                  if (!widget.isAuthProfile)
+                                    FlatButton(
+                                      onPressed: () {
+                                        db.createPostOnSomeoneWall(
+                                            db.authUserID,
+                                            db.authUserID,
+                                            'content 2');
+                                      },
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 24, vertical: 12),
+                                      child: Text(
+                                        'Takip Et',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      color: Colors.amber,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12)),
+                                    )
+                                ],
+                              ),
                             ),
                           ),
                         ),
                         SizedBox(height: 30),
-                        Column(children: createPostWidgetList())
+                        FutureBuilder(
+                          future: db.getPostsMap(),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<dynamic> snapshot) {
+                            if (snapshot.hasData)
+                              return Column(
+                                children: createPostWidgetList(snapshot.data),
+                              );
+                            else
+                              return Container();
+                          },
+                        )
                       ],
                     ),
                   ),

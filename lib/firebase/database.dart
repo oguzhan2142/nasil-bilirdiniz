@@ -98,6 +98,7 @@ Future<void> unLikePost(String postId, String likedPersonId) async {
   Map likedByMap = likedBySnap.value;
 
   String likeKey;
+  if (likedByMap == null) return;
   for (var item in likedByMap.entries) {
     if (item.value == authUserID) likeKey = item.key;
   }
@@ -163,9 +164,17 @@ void createDatabaseRecordForUser() async {
 }
 
 Future<void> createPostOnSomeoneWall(
-    String userId, String authorId, String content) async {
-  var id = firebaseRef.child('persons').child(userId).child('posts').push();
-  id.set({'author': displayName, 'content': content, 'authorId': authorId});
+    String postedToUserId, String authorId, String content) async {
+  DateTime dateTime = DateTime.now();
+
+  var id =
+      firebaseRef.child('persons').child(postedToUserId).child('posts').push();
+  id.set({
+    'author': displayName,
+    'content': content,
+    'authorId': authorId,
+    'date': dateTime.toString()
+  });
 }
 
 void postData(dynamic data, String child) {
