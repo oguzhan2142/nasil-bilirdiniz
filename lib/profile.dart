@@ -25,6 +25,7 @@ class _ProfileState extends State<Profile> {
   int followersCount = 0;
   int postCount = 0;
   Image profileImage;
+  String username = '';
   final picker = ImagePicker();
   File loadedImageFile;
   bool isEditingDescText = false;
@@ -61,19 +62,38 @@ class _ProfileState extends State<Profile> {
   @override
   initState() {
     super.initState();
-    db.getListFromDb('followers').then((value) {
+
+    String idOfPerson = widget.isAuthProfile
+        ? FirebaseAuth.instance.currentUser.uid
+        : widget.deauthProfileId;
+
+    print('id $idOfPerson');
+
+    if (widget.isAuthProfile) {
+      db.getUserInfo('displayName').then((value) {
+        username = value;
+      });
+    } else {
+      db.getUserInfo('displayName', userId: idOfPerson).then((value) {
+        setState(() {
+          username = value;
+        });
+      });
+    }
+
+    db.getListFromDb('followers', userId: idOfPerson).then((value) {
       setState(() {
         if (value != null) followersCount = value.length;
       });
     });
 
-    db.getListFromDb('followings').then((value) {
+    db.getListFromDb('followings', userId: idOfPerson).then((value) {
       setState(() {
         if (value != null) followingCount = value.length;
       });
     });
 
-    db.getPostsMap().then((postMap) {
+    db.getPostsMap(userID: idOfPerson).then((postMap) {
       List<Widget> temp = createPostWidgetList(postMap);
 
       setState(() {
@@ -86,7 +106,7 @@ class _ProfileState extends State<Profile> {
     profileImage = Image.asset('res/user.png', width: 80);
     initProfileImage();
 
-    db.getUserInfo('biography').then((value) {
+    db.getUserInfo('biography', userId: idOfPerson).then((value) {
       setState(() {
         biographyText = value;
       });
@@ -138,9 +158,16 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black87,
-      child: LayoutBuilder(
+    AppBar appBar = AppBar(
+              backgroundColor: Colors.amber,
+              elevation: 0,
+            );
+    return Scaffold(
+      backgroundColor: Colors.grey[850],
+      appBar: widget.isAuthProfile
+          ? null
+          : appBar,
+      body: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
         return SingleChildScrollView(
           child: ConstrainedBox(
@@ -163,24 +190,9 @@ class _ProfileState extends State<Profile> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Icon(Icons.menu),
-                            Text(
-                              'Profil',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            Icon(
-                              Icons.menu,
-                              color: Colors.transparent,
-                            )
-                          ],
-                        ),
-                        SizedBox(height: 20),
+                        widget.isAuthProfile
+                            ? SizedBox(height: appBar.preferredSize.height)
+                            : Container(),
                         ConstrainedBox(
                           constraints: BoxConstraints(
                             minWidth: MediaQuery.of(context).size.width,
@@ -235,7 +247,7 @@ class _ProfileState extends State<Profile> {
                                   ),
                                   SizedBox(height: 10),
                                   Text(
-                                    db.displayName,
+                                    username,
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w600,
@@ -256,7 +268,7 @@ class _ProfileState extends State<Profile> {
                                                   ChoiseButton(
                                                     text: 'Yayınla',
                                                     borderColor: Colors.green,
-                                                    textColor: Colors.black87,
+                                                    textColor: Colors.grey[850],
                                                     onClick: () {
                                                       db
                                                           .updateBiography(
@@ -272,7 +284,7 @@ class _ProfileState extends State<Profile> {
                                                   ChoiseButton(
                                                     text: 'Vazgeç',
                                                     borderColor: Colors.red,
-                                                    textColor: Colors.black87,
+                                                    textColor: Colors.grey[850],
                                                     onClick: () {
                                                       setState(() {
                                                         setEditingMode(false);
@@ -286,14 +298,16 @@ class _ProfileState extends State<Profile> {
                                                 padding: EdgeInsets.all(6),
                                                 decoration: BoxDecoration(
                                                   border: Border.all(
-                                                      color: Colors.black87,
+                                                      color: Colors.grey[850],
                                                       width: 1),
                                                 ),
                                                 child: EditableText(
                                                     controller:
                                                         textEditingController,
                                                     focusNode: FocusNode(),
-                                                    style: TextStyle(),
+                                                    style: TextStyle(
+                                                        color:
+                                                            Colors.grey[850]),
                                                     cursorColor: Colors.amber,
                                                     backgroundCursorColor:
                                                         Colors.transparent),
@@ -419,7 +433,7 @@ class _ProfileState extends State<Profile> {
                                           color: Colors.amber,
                                         ),
                                       ),
-                                      color: Colors.black87,
+                                      color: Colors.grey[850],
                                       shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(12)),

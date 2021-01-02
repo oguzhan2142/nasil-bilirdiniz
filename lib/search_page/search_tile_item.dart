@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:kpss_tercih/firebase/database.dart';
-
-import '../profile_page/deauth_profile.dart';
+import 'package:kpss_tercih/profile.dart';
 
 class SearchTileItem extends StatefulWidget {
   @override
   _SearchTileItemState createState() => _SearchTileItemState();
 
-  Future futureProfileImage;
-  Map userData;
-  String userKey;
+  final Future futureProfileImage;
+  final Map userData;
+  final String userKey;
 
   SearchTileItem(
       {Key key, this.futureProfileImage, this.userKey, this.userData})
@@ -50,10 +49,11 @@ class _SearchTileItemState extends State<SearchTileItem> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => DeauthProfile(
-                                  profileKey: widget.userKey,
-                                  profileData: widget.userData,
-                                )));
+                          builder: (context) => Profile(
+                            deauthProfileId: widget.userKey,
+                            isAuthProfile: false,
+                          ),
+                        ));
                   },
                   child: Image.asset('res/user.png'),
                 );
@@ -63,10 +63,11 @@ class _SearchTileItemState extends State<SearchTileItem> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => DeauthProfile(
-                                  profileKey: widget.userKey,
-                                  profileData: widget.userData,
-                                )));
+                          builder: (context) => Profile(
+                            deauthProfileId: widget.userKey,
+                            isAuthProfile: false,
+                          ),
+                        ));
                   },
                   child: Image.network(snapshot.data),
                 );
