@@ -4,7 +4,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'notification_page/notification_item.dart';
 
-class PostWidget extends StatefulWidget {
+class PostWidget extends StatefulWidget implements Comparable {
   final String author;
   final String content;
   final String postKey;
@@ -12,6 +12,8 @@ class PostWidget extends StatefulWidget {
   final String authorId;
   final String date;
   final bool isAuthProfile;
+  int likes = 0;
+
   PostWidget({
     Key key,
     @required this.authorId,
@@ -21,23 +23,32 @@ class PostWidget extends StatefulWidget {
     @required this.date,
     @required this.content,
     @required this.isAuthProfile,
+    this.likes,
   }) : super(key: key);
 
   @override
   _PostWidgetState createState() => _PostWidgetState();
+
+  @override
+  int compareTo(other) {
+    if (other.likes > likes)
+      return 1;
+    else if (other.likes < likes)
+      return -1;
+    else
+      return 0;
+  }
 }
 
 class _PostWidgetState extends State<PostWidget> {
-  int likeAmount = 0;
+  int likeAmount;
   String currentImagePath = '';
 
   @override
   void initState() {
     super.initState();
-
+    likeAmount = widget.likes;
     updateCurrentImagePath();
-
-    updateLikeAmountText();
   }
 
   void updateCurrentImagePath() {

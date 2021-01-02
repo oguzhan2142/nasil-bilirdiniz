@@ -10,7 +10,6 @@ import 'package:kpss_tercih/firebase/firestore.dart' as store;
 import 'package:kpss_tercih/post_widget.dart';
 
 import 'notification_page/notification_item.dart';
-import 'profile_page/editable_slidable_item.dart';
 import 'profile_page/post_choise_button.dart';
 
 class Profile extends StatefulWidget {
@@ -44,9 +43,12 @@ class _ProfileState extends State<Profile> {
   List<Widget> createPostWidgetList(Map postMap) {
     List<Widget> postWidgets = List();
     var divider = Divider(color: Colors.amber, height: 50, thickness: 0.8);
-    postWidgets.add(divider);
     if (postMap == null) return postWidgets;
+
     postMap.forEach((key, value) {
+      Map likedBy = value['likedBy'];
+      int likes = likedBy == null ? 0 : likedBy.length;
+
       postWidgets.add(PostWidget(
         authorId: value['authorId'],
         postOwnerId: widget.profileID == null
@@ -57,11 +59,15 @@ class _ProfileState extends State<Profile> {
         date: value['date'],
         content: value['content'],
         isAuthProfile: widget.isAuthProfile,
+        likes: likes,
       ));
-
-      postWidgets.add(divider);
+      postWidgets.sort();
     });
 
+    for (var i = 0; i < postWidgets.length; i++) {
+      if (i % 2 == 0) postWidgets.insert(i, divider);
+    }
+    postWidgets.add(divider);
     return postWidgets;
   }
 
@@ -85,9 +91,10 @@ class _ProfileState extends State<Profile> {
       });
     } else {
       db.getUserInfo('displayName', userId: widget.profileID).then((value) {
-        setState(() {
-          username = value;
-        });
+        if (mounted)
+          setState(() {
+            username = value;
+          });
       });
     }
 
@@ -102,9 +109,10 @@ class _ProfileState extends State<Profile> {
     initProfileImage();
 
     db.getUserInfo('biography', userId: widget.profileID).then((value) {
-      setState(() {
-        biographyText = value;
-      });
+      if (mounted)
+        setState(() {
+          biographyText = value;
+        });
     });
 
     editableSlidableItem = EditablePostWidget(
@@ -114,11 +122,11 @@ class _ProfileState extends State<Profile> {
         List<Widget> temp = List();
         temp.addAll(postWidgets);
         temp.remove(editableSlidableItem);
-
-        setState(() {
-          postWidgets = temp;
-          floatingActionVisible = true;
-        });
+        if (mounted)
+          setState(() {
+            postWidgets = temp;
+            floatingActionVisible = true;
+          });
       },
     );
   }
@@ -159,9 +167,10 @@ class _ProfileState extends State<Profile> {
     String imageUrl = await store.getDownloadLink(uid: id);
     if (imageUrl != null) {
       Image temp = Image.network(imageUrl, width: 80);
-      setState(() {
-        profileImage = temp;
-      });
+      if (mounted)
+        setState(() {
+          profileImage = temp;
+        });
       temp = null;
     }
   }
