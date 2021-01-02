@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,13 +9,14 @@ import 'package:kpss_tercih/post_widget.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'package:kpss_tercih/firebase/firestore.dart' as store;
 
+import 'notification_page/notification_item.dart';
 import 'profile_page/post_choise_button.dart';
 
 class Profile extends StatefulWidget {
   final bool isAuthProfile;
-  final String deauthProfileId;
+  final String profileID;
 
-  Profile({Key key, @required this.isAuthProfile, this.deauthProfileId})
+  Profile({Key key, @required this.isAuthProfile, this.profileID})
       : super(key: key);
   @override
   _ProfileState createState() => _ProfileState();
@@ -31,6 +33,7 @@ class _ProfileState extends State<Profile> {
   bool isEditingDescText = false;
   bool isBiographyWidgetVisible = true;
   String biographyText = '';
+  bool isFollowingThisUser = false;
   TextEditingController textEditingController = TextEditingController();
 
   List<Widget> postWidgets = List();
@@ -39,13 +42,13 @@ class _ProfileState extends State<Profile> {
     List<Widget> postWidgets = List();
     var divider = Divider(color: Colors.amber, height: 50, thickness: 0.8);
     postWidgets.add(divider);
-
+    if (postMap == null) return postWidgets;
     postMap.forEach((key, value) {
       postWidgets.add(PostWidget(
         authorId: value['authorId'],
-        postOwnerId: widget.deauthProfileId == null
-            ? db.authUserID
-            : widget.deauthProfileId,
+        postOwnerId: widget.profileID == null
+            ? FirebaseAuth.instance.currentUser.uid
+            : widget.profileID,
         postKey: key,
         author: value['author'],
         date: value['date'],
@@ -59,41 +62,36 @@ class _ProfileState extends State<Profile> {
     return postWidgets;
   }
 
+  void checkFollowing() async {
+    db.isFollowing(widget.profileID).then((isFollowing) {
+      setState(() {
+        isFollowingThisUser = isFollowing;
+      });
+    });
+  }
+
   @override
   initState() {
     super.initState();
-
-    String idOfPerson = widget.isAuthProfile
-        ? FirebaseAuth.instance.currentUser.uid
-        : widget.deauthProfileId;
-
-    print('id $idOfPerson');
 
     if (widget.isAuthProfile) {
       db.getUserInfo('displayName').then((value) {
         username = value;
       });
     } else {
-      db.getUserInfo('displayName', userId: idOfPerson).then((value) {
+      db.getUserInfo('displayName', userId: widget.profileID).then((value) {
         setState(() {
           username = value;
         });
       });
     }
 
-    db.getListFromDb('followers', userId: idOfPerson).then((value) {
-      setState(() {
-        if (value != null) followersCount = value.length;
-      });
-    });
+    updateFollowers();
 
-    db.getListFromDb('followings', userId: idOfPerson).then((value) {
-      setState(() {
-        if (value != null) followingCount = value.length;
-      });
-    });
+    updateFollowings();
 
-    db.getPostsMap(userID: idOfPerson).then((postMap) {
+    db.getPostsMap(userID: widget.profileID).then((postMap) {
+      if (postMap == null) return;
       List<Widget> temp = createPostWidgetList(postMap);
 
       setState(() {
@@ -103,19 +101,38 @@ class _ProfileState extends State<Profile> {
       temp = null;
     });
 
+    if (!widget.isAuthProfile) checkFollowing();
+
     profileImage = Image.asset('res/user.png', width: 80);
     initProfileImage();
 
-    db.getUserInfo('biography', userId: idOfPerson).then((value) {
+    db.getUserInfo('biography', userId: widget.profileID).then((value) {
       setState(() {
         biographyText = value;
       });
     });
   }
 
+  void updateFollowings() {
+    db.getListFromDb('followings', userId: widget.profileID).then((value) {
+      setState(() {
+        if (value != null) followingCount = value.length;
+      });
+    });
+  }
+
+  void updateFollowers() {
+    db.getListFromDb('followers', userId: widget.profileID).then((value) {
+      setState(() {
+        if (value != null) followersCount = value.length;
+      });
+    });
+  }
+
   Future initProfileImage() async {
-    String id =
-        widget.deauthProfileId == null ? db.authUserID : widget.deauthProfileId;
+    String id = widget.profileID == null
+        ? FirebaseAuth.instance.currentUser.uid
+        : widget.profileID;
 
     String imageUrl = await store.getDownloadLink(uid: id);
     if (imageUrl != null) {
@@ -148,6 +165,77 @@ class _ProfileState extends State<Profile> {
     return pickedFile != null;
   }
 
+  Widget getCardButton() {
+    if (!widget.isAuthProfile) {
+      if (!isFollowingThisUser) {
+        return FlatButton(
+          onPressed: () {
+            db.addUserToFollowings(widget.profileID).whenComplete(() {
+              checkFollowing();
+              String message = '$username takip etti';
+              db.createNotification(
+                  NotificationType.followed, widget.profileID, message);
+              updateFollowers();
+              updateFollowings();
+            });
+          },
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Text(
+            'Takip Et',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          color: Colors.amber,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        );
+      } else {
+        return FlatButton(
+          onPressed: () {
+            db.removeUserFromFollowings(widget.profileID).whenComplete(() {
+              checkFollowing();
+              String message = '$username takipten çıktı';
+              db.createNotification(
+                  NotificationType.unfollowed, widget.profileID, message);
+              updateFollowers();
+              updateFollowings();
+            });
+          },
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Text(
+            'Takipten Çık',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          color: Colors.amber,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        );
+      }
+    } else {
+      return FlatButton(
+        onPressed: () {
+          FirebaseAuth.instance.signOut();
+        },
+        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        child: Text(
+          'Çıkış Yap',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: Colors.amber,
+          ),
+        ),
+        color: Colors.grey[850],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      );
+    }
+  }
+
   void setEditingMode(bool isEditing) {
     setState(() {
       textEditingController.text = biographyText;
@@ -159,14 +247,12 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     AppBar appBar = AppBar(
-              backgroundColor: Colors.amber,
-              elevation: 0,
-            );
+      backgroundColor: Colors.amber,
+      elevation: 0,
+    );
     return Scaffold(
       backgroundColor: Colors.grey[850],
-      appBar: widget.isAuthProfile
-          ? null
-          : appBar,
+      appBar: widget.isAuthProfile ? null : appBar,
       body: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
         return SingleChildScrollView(
@@ -180,8 +266,9 @@ class _ProfileState extends State<Profile> {
                   decoration: BoxDecoration(
                     color: Colors.amber,
                     borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.elliptical(150, 40),
-                        bottomRight: Radius.elliptical(150, 40)),
+                      bottomLeft: Radius.elliptical(150, 40),
+                      bottomRight: Radius.elliptical(150, 40),
+                    ),
                   ),
                 ),
                 Center(
@@ -396,48 +483,7 @@ class _ProfileState extends State<Profile> {
                                     ],
                                   ),
                                   SizedBox(height: 15),
-                                  if (!widget.isAuthProfile)
-                                    FlatButton(
-                                      onPressed: () {
-                                        db.createPostOnSomeoneWall(
-                                            db.authUserID,
-                                            db.authUserID,
-                                            'content 2');
-                                      },
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 24, vertical: 12),
-                                      child: Text(
-                                        'Takip Et',
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                      color: Colors.amber,
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12)),
-                                    )
-                                  else
-                                    FlatButton(
-                                      onPressed: () {
-                                        FirebaseAuth.instance.signOut();
-                                      },
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 24, vertical: 12),
-                                      child: Text(
-                                        'Çıkış Yap',
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.amber,
-                                        ),
-                                      ),
-                                      color: Colors.grey[850],
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12)),
-                                    )
+                                  getCardButton(),
                                 ],
                               ),
                             ),

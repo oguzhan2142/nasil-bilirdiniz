@@ -1,6 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kpss_tercih/profile.dart';
-import 'package:kpss_tercih/profile_page/person_profile.txt';
 import 'firebase/database.dart' as db;
 import 'search_page/search_page.dart';
 import 'notification_page/notification.dart';
@@ -49,8 +49,10 @@ class _HomeState extends State<Home> {
     else if (_selectedIndex == 1)
       return NotificationPage();
     else if (_selectedIndex == 2)
-      return Profile(isAuthProfile: true);
-    // return PersonProfle();
+      return Profile(
+        isAuthProfile: true,
+        profileID: FirebaseAuth.instance.currentUser.uid,
+      );
     else
       return null;
   }

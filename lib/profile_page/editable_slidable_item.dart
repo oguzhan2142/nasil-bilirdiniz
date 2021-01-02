@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'package:kpss_tercih/firebase/firestore.dart';
@@ -84,7 +85,7 @@ class _EditableSlidableItemState extends State<EditableSlidableItem> {
                                   db
                                       .createPostOnSomeoneWall(
                                     widget.profileKey,
-                                    db.authUserID,
+                                    FirebaseAuth.instance.currentUser.uid,
                                     editableController.text,
                                   )
                                       .whenComplete(() {

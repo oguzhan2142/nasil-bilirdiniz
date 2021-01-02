@@ -50,7 +50,7 @@ class _SearchTileItemState extends State<SearchTileItem> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => Profile(
-                            deauthProfileId: widget.userKey,
+                            profileID: widget.userKey,
                             isAuthProfile: false,
                           ),
                         ));
@@ -64,7 +64,7 @@ class _SearchTileItemState extends State<SearchTileItem> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => Profile(
-                            deauthProfileId: widget.userKey,
+                            profileID: widget.userKey,
                             isAuthProfile: false,
                           ),
                         ));

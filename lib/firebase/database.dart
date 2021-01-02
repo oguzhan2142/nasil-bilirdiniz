@@ -3,7 +3,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:kpss_tercih/notification_page/notification_item.dart';
 
 final firebaseRef = FirebaseDatabase.instance.reference();
-String authUserID = FirebaseAuth.instance.currentUser.uid;
 
 String displayName;
 
@@ -27,6 +26,7 @@ Future<Map> fetchAllUsers() async {
 }
 
 Future<dynamic> getUserInfo(String info, {String userId}) async {
+  String authUserID = FirebaseAuth.instance.currentUser.uid;
   if (userId != null) authUserID = userId;
 
   var ref = firebaseRef.child('persons/$authUserID/$info');
@@ -34,17 +34,21 @@ Future<dynamic> getUserInfo(String info, {String userId}) async {
   return snapshot.value;
 }
 
-Future<void> addUserToFollowings(String uId) async {
-  bool isFollowingUser = await isFollowing(uId);
-
+Future<void> addUserToFollowings(String deauthUserID) async {
+  String authUserID = FirebaseAuth.instance.currentUser.uid;
+  bool isFollowingUser = await isFollowing(deauthUserID);
+  
   if (!isFollowingUser) {
-    postData(uId, 'followings');
-    var x = firebaseRef.child('persons/$uId/followers').push();
+    postDataToAuthUser(deauthUserID, 'followings');
+    var x = firebaseRef.child('persons/$deauthUserID/followers').push();
     x.set(authUserID);
+
+    print('auth user id $authUserID');
   }
 }
 
 Future<void> removeUserFromFollowings(String uId) async {
+  String authUserID = FirebaseAuth.instance.currentUser.uid;
   DatabaseReference followingsRef =
       firebaseRef.child('persons').child(authUserID).child('followings');
   DataSnapshot followingSnap = await followingsRef.once();
@@ -87,6 +91,7 @@ Future<int> getLikeAmount(String postId, String personID) async {
 }
 
 Future<void> unLikePost(String postId, String likedPersonId) async {
+  String authUserID = FirebaseAuth.instance.currentUser.uid;
   DatabaseReference removeRef = firebaseRef
       .child('persons')
       .child(likedPersonId)
@@ -107,6 +112,7 @@ Future<void> unLikePost(String postId, String likedPersonId) async {
 }
 
 Future<void> likePost(String postId, String likedPersonId) async {
+  String authUserID = FirebaseAuth.instance.currentUser.uid;
   DatabaseReference likedPostRef = firebaseRef
       .child('persons')
       .child(likedPersonId)
@@ -119,6 +125,7 @@ Future<void> likePost(String postId, String likedPersonId) async {
 }
 
 Future<bool> isPostLiked(String postId, String likedPersonId) async {
+  String authUserID = FirebaseAuth.instance.currentUser.uid;
   DatabaseReference likedPostRef = firebaseRef
       .child('persons')
       .child(likedPersonId)
@@ -177,18 +184,20 @@ Future<void> createPostOnSomeoneWall(
   });
 }
 
-void postData(dynamic data, String child) {
+void postDataToAuthUser(dynamic data, String child) {
   String uId = FirebaseAuth.instance.currentUser.uid;
   var x = firebaseRef.child('persons/$uId/$child').push();
   x.set(data);
 }
 
 Future<void> updateBiography(String biography) async {
+  String authUserID = FirebaseAuth.instance.currentUser.uid;
   var ref = firebaseRef.child('persons').child(authUserID);
   ref.update({'biography': biography});
 }
 
 Future<Map> getPostsMap({String userID}) async {
+  String authUserID = FirebaseAuth.instance.currentUser.uid;
   String id = userID == null ? authUserID : userID;
 
   DatabaseReference ref = firebaseRef.child('persons').child(id).child('posts');
@@ -197,6 +206,7 @@ Future<Map> getPostsMap({String userID}) async {
 }
 
 Future<List> getListFromDb(String child, {String userId}) async {
+  String authUserID = FirebaseAuth.instance.currentUser.uid;
   String id;
   if (userId != null)
     id = userId;
@@ -232,6 +242,7 @@ Future<void> createNotification(
 }
 
 void removeAllNotifications() {
+  String authUserID = FirebaseAuth.instance.currentUser.uid;
   DatabaseReference ref =
       firebaseRef.child('persons').child(authUserID).child('notifications');
 
@@ -239,6 +250,7 @@ void removeAllNotifications() {
 }
 
 void removeNotification(String notificationID) {
+  String authUserID = FirebaseAuth.instance.currentUser.uid;
   DatabaseReference ref = firebaseRef
       .child('persons')
       .child(authUserID)
@@ -249,6 +261,7 @@ void removeNotification(String notificationID) {
 }
 
 Future<Map> fetchNotifications() async {
+  String authUserID = FirebaseAuth.instance.currentUser.uid;
   DataSnapshot snapshot = await firebaseRef
       .child('persons')
       .child(authUserID)
