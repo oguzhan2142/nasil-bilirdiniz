@@ -4,11 +4,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kpss_tercih/editable_post_widget.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'package:kpss_tercih/firebase/firestore.dart' as store;
 import 'package:kpss_tercih/post_widget.dart';
 
 import 'notification_page/notification_item.dart';
+import 'profile_page/editable_slidable_item.dart';
 import 'profile_page/post_choise_button.dart';
 
 class Profile extends StatefulWidget {
@@ -34,6 +36,8 @@ class _ProfileState extends State<Profile> {
   String biographyText = '';
   bool isFollowingThisUser = false;
   TextEditingController textEditingController = TextEditingController();
+  bool floatingActionVisible;
+  EditablePostWidget editableSlidableItem;
 
   List<Widget> postWidgets = List();
 
@@ -73,6 +77,7 @@ class _ProfileState extends State<Profile> {
   initState() {
     super.initState();
     profileImage = Image.asset('res/user.png', width: 80);
+    floatingActionVisible = !widget.isAuthProfile;
 
     if (widget.isAuthProfile) {
       db.getUserInfo('displayName').then((value) {
@@ -90,16 +95,7 @@ class _ProfileState extends State<Profile> {
 
     updateFollowings();
 
-    db.getPostsMap(userID: widget.profileID).then((postMap) {
-      if (postMap == null) return;
-      List<Widget> temp = createPostWidgetList(postMap);
-
-      setState(() {
-        postWidgets = temp;
-        postCount = postMap.length;
-      });
-      temp = null;
-    });
+    updatePostWidgetsList();
 
     if (!widget.isAuthProfile) checkFollowing();
 
@@ -109,6 +105,33 @@ class _ProfileState extends State<Profile> {
       setState(() {
         biographyText = value;
       });
+    });
+
+    editableSlidableItem = EditablePostWidget(
+      profileKey: widget.profileID,
+      updatePostWidgets: updatePostWidgetsList,
+      onCancel: () {
+        List<Widget> temp = List();
+        temp.addAll(postWidgets);
+        temp.remove(editableSlidableItem);
+
+        setState(() {
+          postWidgets = temp;
+          floatingActionVisible = true;
+        });
+      },
+    );
+  }
+
+  void updatePostWidgetsList() {
+    db.getPostsMap(userID: widget.profileID).then((postMap) {
+      if (postMap == null) return;
+      List<Widget> temp = createPostWidgetList(postMap);
+      setState(() {
+        postWidgets = temp;
+        postCount = postMap.length;
+      });
+      temp = null;
     });
   }
 
@@ -252,6 +275,27 @@ class _ProfileState extends State<Profile> {
     return Scaffold(
       backgroundColor: Colors.grey[850],
       appBar: widget.isAuthProfile ? null : appBar,
+      floatingActionButton: Visibility(
+        visible: floatingActionVisible,
+        child: FloatingActionButton(
+          onPressed: () {
+            List<Widget> temp = List();
+            temp.addAll(postWidgets);
+            temp.add(editableSlidableItem);
+
+            setState(() {
+              postWidgets = temp;
+              floatingActionVisible = false;
+            });
+            editableSlidableItem.focusNode.requestFocus();
+          },
+          child: Icon(
+            Icons.add,
+            color: Colors.amber,
+          ),
+          backgroundColor: Colors.black.withAlpha(120),
+        ),
+      ),
       body: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
         return SingleChildScrollView(
