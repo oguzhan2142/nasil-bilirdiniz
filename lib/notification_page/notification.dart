@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'package:kpss_tercih/notification_page/notification_item.dart';
-import 'package:kpss_tercih/profile_page/slidable_item.dart';
 
 class NotificationPage extends StatefulWidget {
   @override

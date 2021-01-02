@@ -157,7 +157,7 @@ class _PostWidgetState extends State<PostWidget> {
                 padding: EdgeInsets.all(15.0),
                 shape: CircleBorder(),
               );
-            else if(index == 1 && !widget.isAuthProfile)
+            else if (index == 1 && !widget.isAuthProfile)
               return RawMaterialButton(
                 onPressed: () {
                   like();
@@ -178,6 +178,8 @@ class _PostWidgetState extends State<PostWidget> {
                 padding: EdgeInsets.all(15.0),
                 shape: CircleBorder(),
               );
+            else
+              return Container();
           }),
     );
   }

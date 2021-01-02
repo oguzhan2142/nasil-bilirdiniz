@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'authentication_service.dart';
 
 class SingUp extends StatelessWidget {
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController nameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {

@@ -1,13 +1,12 @@
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:kpss_tercih/post_widget.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'package:kpss_tercih/firebase/firestore.dart' as store;
+import 'package:kpss_tercih/post_widget.dart';
 
 import 'notification_page/notification_item.dart';
 import 'profile_page/post_choise_button.dart';
@@ -73,6 +72,7 @@ class _ProfileState extends State<Profile> {
   @override
   initState() {
     super.initState();
+    profileImage = Image.asset('res/user.png', width: 80);
 
     if (widget.isAuthProfile) {
       db.getUserInfo('displayName').then((value) {
@@ -103,7 +103,6 @@ class _ProfileState extends State<Profile> {
 
     if (!widget.isAuthProfile) checkFollowing();
 
-    profileImage = Image.asset('res/user.png', width: 80);
     initProfileImage();
 
     db.getUserInfo('biography', userId: widget.profileID).then((value) {

@@ -7,9 +7,9 @@ import 'package:kpss_tercih/profile_page/post_choise_button.dart';
 
 class EditableSlidableItem extends StatefulWidget {
   final String profileKey;
-  Function onCancel;
-  Function updatePostWidgets;
-  FocusNode focusNode = FocusNode();
+  final Function onCancel;
+  final Function updatePostWidgets;
+  final FocusNode focusNode = FocusNode();
 
   EditableSlidableItem(
       {Key key, this.updatePostWidgets, this.onCancel, this.profileKey})

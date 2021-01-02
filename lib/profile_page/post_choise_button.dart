@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:kpss_tercih/firebase/database.dart' as db;
 
 class ChoiseButton extends StatelessWidget {
   final Function onClick;
