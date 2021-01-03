@@ -167,6 +167,29 @@ Future<void> createPostOnSomeoneWall(
   id.set({'author': username, 'content': content, 'date': dateTime.toString()});
 }
 
+Future deletePost(String postOwnerUserID) async{
+  String authID = FirebaseAuth.instance.currentUser.uid;
+  var ref = firebaseRef
+      .child('persons')
+      .child(postOwnerUserID)
+      .child('posts')
+      .child(authID);
+  ref.remove();
+}
+
+Future<void> updatePost(String postOwnerUserID, String text) async {
+  String authID = FirebaseAuth.instance.currentUser.uid;
+  var ref = firebaseRef
+      .child('persons')
+      .child(postOwnerUserID)
+      .child('posts')
+      .child(authID);
+
+  ref.update({
+    'content': text,
+  });
+}
+
 void postDataToAuthUser(dynamic data, String child) {
   String uId = FirebaseAuth.instance.currentUser.uid;
   var x = firebaseRef.child('persons/$uId/$child').push();
@@ -178,7 +201,7 @@ Future<bool> isAlreadyPosted(String userID) async {
   Map posts = await getPostsMap(userID: userID);
   bool isPosted = false;
   if (posts == null) return false;
-  
+
   for (var item in posts.keys) {
     String authorID = item;
     if (authorID == uId) {
@@ -189,8 +212,6 @@ Future<bool> isAlreadyPosted(String userID) async {
   return isPosted;
 }
 
-void updatePost(String postOwnerUserID) async {}
-
 Future<void> updateBiography(String biography) async {
   String authUserID = FirebaseAuth.instance.currentUser.uid;
   var ref = firebaseRef.child('persons').child(authUserID);
@@ -198,8 +219,7 @@ Future<void> updateBiography(String biography) async {
 }
 
 Future<Map> getPostsMap({String userID}) async {
-  String authUserID = FirebaseAuth.instance.currentUser.uid;
-  String id = userID == null ? authUserID : userID;
+  String id = userID == null ? FirebaseAuth.instance.currentUser.uid : userID;
 
   DatabaseReference ref = firebaseRef.child('persons').child(id).child('posts');
   DataSnapshot snapshot = await ref.once();

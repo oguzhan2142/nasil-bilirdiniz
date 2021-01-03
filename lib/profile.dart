@@ -53,7 +53,6 @@ class _ProfileState extends State<Profile> {
       int likes = likedBy == null ? 0 : likedBy.length;
 
       postWidgets.add(PostWidget(
-        authorId: value['authorId'],
         postOwnerId: widget.profileID == null
             ? FirebaseAuth.instance.currentUser.uid
             : widget.profileID,
@@ -87,7 +86,6 @@ class _ProfileState extends State<Profile> {
       db.isAlreadyPosted(widget.profileID).then((value) {
         setState(() {
           isAlreadyPostedToAuthUser = value;
-          print('isAlreay $isAlreadyPostedToAuthUser');
         });
       });
     }
@@ -143,7 +141,8 @@ class _ProfileState extends State<Profile> {
       onCancel: () {
         List<Widget> temp = List();
         temp.addAll(postWidgets);
-        temp.remove(newPostEditablePostWidget);
+        temp.remove(updatePostEditablePostWidget);
+
         if (mounted)
           setState(() {
             postWidgets = temp;
@@ -153,16 +152,25 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  void updatePostWidgetsList() {
-    db.getPostsMap(userID: widget.profileID).then((postMap) {
-      if (postMap == null) return;
-      List<PostWidget> temp = createPostWidgetList(postMap);
+  void updatePostWidgetsList() async {
+    bool isPosted = await db.isAlreadyPosted(widget.profileID);
+    Map postMap = await db.getPostsMap(userID: widget.profileID);
+    if (postMap == null) {
       setState(() {
-        postWidgets = temp;
-        postCount = postMap.length;
+        isAlreadyPostedToAuthUser = isPosted;
+        postCount = 0;
       });
-      temp = null;
+    }
+    ;
+    List<PostWidget> temp = createPostWidgetList(postMap);
+
+    setState(() {
+      postWidgets = temp;
+      postCount = postMap.length;
+      isAlreadyPostedToAuthUser = isPosted;
     });
+
+    temp = null;
   }
 
   void updateFollowings() {
@@ -593,7 +601,8 @@ class _ProfileState extends State<Profile> {
     String authUserID = FirebaseAuth.instance.currentUser.uid;
     int index = postWidgets.indexWhere((w) {
       PostWidget postWidget = w;
-      if (postWidget.authorId == authUserID) return true;
+
+      if (postWidget.postKey == authUserID) return true;
       return false;
     });
 

@@ -9,14 +9,14 @@ class PostWidget extends StatefulWidget implements Comparable {
   final String content;
   final String postKey;
   final String postOwnerId;
-  final String authorId;
+
   final String date;
   final bool isAuthProfile;
   final int likes;
 
   PostWidget({
     Key key,
-    @required this.authorId,
+
     @required this.postOwnerId,
     @required this.postKey,
     @required this.author,

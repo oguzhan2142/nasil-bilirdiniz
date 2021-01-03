@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:kpss_tercih/profile.dart';
 
 import 'notification_page/notification_item.dart';
 import 'profile_page/post_choise_button.dart';
@@ -37,33 +37,19 @@ class EditablePostWidget extends StatelessWidget {
           children: [
             ChoiseButton(
               onClick: () {
-                db
-                    .createPostOnSomeoneWall(
-                  profileKey,
-                  editableController.text,
-                )
-                    .whenComplete(() async {
-                  String username = await db.getUserInfo('username');
-                  String message = '$username duvarinda gonderi paylaştı';
-                  db.createNotification(
-                      NotificationType.post, profileKey, message);
-                });
-                onCancel();
-                updatePostWidgets();
+                if (!isUpdateVersion)
+                  createPost();
+                else
+                  updatePost();
               },
-              text: 'Yayınla',
+              text: isUpdateVersion ? 'Güncelle' : 'Yayınla',
               borderColor: Colors.green,
               textColor: Colors.green,
             ),
             isUpdateVersion ? SizedBox(width: 6) : Container(),
             isUpdateVersion
                 ? ChoiseButton(
-                    onClick: () {
-                      // db.updatePost(profileKey, )
-
-                      onCancel();
-                      updatePostWidgets();
-                    },
+                    onClick: deletePost,
                     text: 'Sil',
                     borderColor: Colors.red,
                     textColor: Colors.red,
@@ -119,5 +105,37 @@ class EditablePostWidget extends StatelessWidget {
         Divider(color: Colors.amber, height: 50, thickness: 0.8),
       ],
     );
+  }
+
+  Future createPost() async {
+    db
+        .createPostOnSomeoneWall(profileKey, editableController.text)
+        .whenComplete(() async {
+      String username = await db.getUserInfo('username');
+      String message = '$username duvarinda gonderi paylaştı';
+      db.createNotification(NotificationType.post, profileKey, message);
+      updatePostWidgets();
+      onCancel();
+    });
+  }
+
+  Future updatePost() async {
+    db.updatePost(profileKey, editableController.text).whenComplete(() async {
+      String username = await db.getUserInfo('username');
+      String message = '$username duvarinda gonderisini güncelledi';
+      db.createNotification(NotificationType.post, profileKey, message);
+      updatePostWidgets();
+      onCancel();
+    });
+  }
+
+  deletePost() async {
+    db.deletePost(profileKey);
+    String username = await db.getUserInfo('username');
+    String message = '$username duvarinda gonderisini güncelledi';
+    await db.createNotification(NotificationType.post, profileKey, message);
+
+    await updatePostWidgets();
+    onCancel();
   }
 }
