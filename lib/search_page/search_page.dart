@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:kpss_tercih/firebase/database.dart';
+import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'package:kpss_tercih/firebase/firestore.dart';
 import 'package:kpss_tercih/search_page/search_tile_item.dart';
+import 'package:kpss_tercih/search_result.dart';
+import 'package:string_similarity/string_similarity.dart';
 
 class Search extends StatefulWidget {
   @override
@@ -48,14 +50,25 @@ class _SearchState extends State<Search> {
 
   void search(String query) async {
     List<Widget> results = List();
-    Map<dynamic, dynamic> users = await fetchAllUsers();
+
+    Map<dynamic, dynamic> users = await db.fetchAllUsers();
     String authId = FirebaseAuth.instance.currentUser.uid;
 
+    if (users == null) {
+      return;
+    }
+    List<SearchResult> searchResults = List();
+
     users.forEach((key, value) {
-      if (authId != key) {
-        Future profileImageLink = getDownloadLink(uid: key);
-        Widget w = _createTileItem(key, value, profileImageLink);
-        results.add(w);
+      searchResults.add(SearchResult(key, value, query));
+    });
+
+    searchResults.sort();
+
+    searchResults.forEach((element) {
+      if (authId != element.itemKey) {
+        Future profileImageLink = getDownloadLink(uid: element.itemKey);
+        results.add(_createTileItem(element, profileImageLink));
       }
     });
 
@@ -126,10 +139,10 @@ class _SearchState extends State<Search> {
     );
   }
 
-  Widget _createTileItem(String key, Map userData, Future futureProfileImage) {
+  Widget _createTileItem(SearchResult searchResult, Future futureProfileImage) {
     return SearchTileItem(
-      userKey: key,
-      userData: userData,
+      userKey: searchResult.itemKey,
+      userData: searchResult.itemValue,
       futureProfileImage: futureProfileImage,
     );
   }

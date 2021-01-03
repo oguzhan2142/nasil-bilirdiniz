@@ -10,10 +10,8 @@ class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.teal,
-      ),
-      backgroundColor: Colors.teal,
+      
+      backgroundColor: Colors.amber,
       resizeToAvoidBottomInset: false,
       body: Container(
         child: Column(
@@ -22,7 +20,7 @@ class Login extends StatelessWidget {
             Container(
               child: Padding(
                 padding:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 50),
+                    const EdgeInsets.symmetric(vertical: 60, horizontal: 50),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -34,7 +32,7 @@ class Login extends StatelessWidget {
                           Text(
                             'Welcome',
                             style: TextStyle(
-                              color: Colors.white60,
+                              color: Colors.grey[700],
                             ),
                           ),
                           SizedBox(height: 5),
@@ -44,7 +42,7 @@ class Login extends StatelessWidget {
                               fontSize: 40,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 1.1,
-                              color: Colors.white,
+                              color: Colors.grey[850],
                             ),
                           ),
                         ],
@@ -71,7 +69,7 @@ class Login extends StatelessWidget {
                             decoration: InputDecoration(
                               labelText: 'E-mail',
                               labelStyle: TextStyle(
-                                color: Colors.black,
+                                color: Colors.grey[850],
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -85,7 +83,7 @@ class Login extends StatelessWidget {
                               labelText: 'Password',
                               labelStyle: TextStyle(
                                 fontSize: 18,
-                                color: Colors.black,
+                                color: Colors.grey[850],
                                 fontWeight: FontWeight.bold,
                               ),
                             )),
@@ -100,7 +98,7 @@ class Login extends StatelessWidget {
                             'Forget Password?',
                             style: TextStyle(
                               fontSize: 20,
-                              color: Colors.grey,
+                              color: Colors.grey[600],
                             ),
                           ),
                         ),
@@ -114,7 +112,7 @@ class Login extends StatelessWidget {
                               ),
                               minWidth:
                                   MediaQuery.of(context).size.width * 0.65,
-                              color: Colors.teal,
+                              color: Colors.amber,
                               onPressed: () {
                                 context
                                     .read<AuthenticationService>()
@@ -130,7 +128,7 @@ class Login extends StatelessWidget {
                               child: Text(
                                 'Sing In',
                                 style: TextStyle(
-                                    color: Colors.white,
+                                    color: Colors.grey[850],
                                     fontSize: 18,
                                     letterSpacing: 1.1),
                               ),
@@ -174,7 +172,7 @@ class Login extends StatelessWidget {
                                 'Don\'t have an account?',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: Colors.grey,
+                                  color: Colors.grey[600],
                                 ),
                               ),
                               FlatButton(
@@ -186,7 +184,7 @@ class Login extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.teal,
+                                      color: Colors.amber,
                                     ),
                                   ))
                             ],

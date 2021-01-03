@@ -6,13 +6,12 @@ import 'profile_page/post_choise_button.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
 
 class EditablePostWidget extends StatelessWidget {
-  TextStyle editTextStyle = TextStyle(fontSize: 14, color: Colors.amber[700]);
-  TextEditingController editableController = TextEditingController();
+  final TextStyle editTextStyle = TextStyle(fontSize: 14, color: Colors.amber[700]);
+  final TextEditingController editableController = TextEditingController();
   final String profileKey;
   final Function onCancel;
   final Function updatePostWidgets;
   final FocusNode focusNode = FocusNode();
-  String userName;
 
   EditablePostWidget(
       {Key key, this.profileKey, this.onCancel, this.updatePostWidgets})

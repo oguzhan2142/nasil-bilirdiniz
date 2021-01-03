@@ -12,11 +12,14 @@ class SingUp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.teal,
-      ),
-      backgroundColor: Colors.teal,
+      
+      backgroundColor: Colors.amber,
       resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        backgroundColor: Colors.amber,
+        elevation: 0,
+        shadowColor: Colors.amber,
+      ),
       body: Container(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -24,7 +27,7 @@ class SingUp extends StatelessWidget {
             Container(
               child: Padding(
                 padding:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 50),
+                    const EdgeInsets.symmetric(vertical: 30, horizontal: 50),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -36,7 +39,7 @@ class SingUp extends StatelessWidget {
                           Text(
                             'Welcome',
                             style: TextStyle(
-                              color: Colors.white60,
+                              color: Colors.grey[700],
                             ),
                           ),
                           SizedBox(height: 5),
@@ -46,7 +49,7 @@ class SingUp extends StatelessWidget {
                               fontSize: 40,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 1.1,
-                              color: Colors.white,
+                              color: Colors.grey[850],
                             ),
                           ),
                         ],
@@ -71,9 +74,9 @@ class SingUp extends StatelessWidget {
                         TextField(
                             controller: nameController,
                             decoration: InputDecoration(
-                              labelText: 'Name Surname',
+                              labelText: 'Username',
                               labelStyle: TextStyle(
-                                color: Colors.black,
+                                color: Colors.grey[850],
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -86,7 +89,7 @@ class SingUp extends StatelessWidget {
                             decoration: InputDecoration(
                               labelText: 'E-mail',
                               labelStyle: TextStyle(
-                                color: Colors.black,
+                                color: Colors.grey[850],
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -100,7 +103,7 @@ class SingUp extends StatelessWidget {
                               labelText: 'Password',
                               labelStyle: TextStyle(
                                 fontSize: 18,
-                                color: Colors.black,
+                                color: Colors.grey[850],
                                 fontWeight: FontWeight.bold,
                               ),
                             )),
@@ -116,7 +119,7 @@ class SingUp extends StatelessWidget {
                               ),
                               minWidth:
                                   MediaQuery.of(context).size.width * 0.65,
-                              color: Colors.teal,
+                              color: Colors.amber,
                               onPressed: () {
                                 context
                                     .read<AuthenticationService>()
@@ -137,7 +140,7 @@ class SingUp extends StatelessWidget {
                               child: Text(
                                 'Sing Up',
                                 style: TextStyle(
-                                    color: Colors.white,
+                                    color: Colors.grey[850],
                                     fontSize: 18,
                                     letterSpacing: 1.1),
                               ),

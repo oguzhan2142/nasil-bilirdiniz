@@ -8,7 +8,6 @@ class Post implements Comparable {
   String authorID;
   String postOwnerUserID;
   int likes = 0;
-  bool _fetchedLikes = false;
   Post(
     this.authorUsername,
     this.authorID,
@@ -23,14 +22,10 @@ class Post implements Comparable {
   void updateLikeAmountText() {
     db.getLikeAmount(postKey, postOwnerUserID).then((value) {
       likes = value;
-      _fetchedLikes = true;
     });
   }
 
-  bool canComparable() {
-    return _fetchedLikes;
-  }
-
+  
   @override
   int compareTo(other) {
     // TODO: implement compareTo

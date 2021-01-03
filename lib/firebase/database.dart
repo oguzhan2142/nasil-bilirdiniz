@@ -37,7 +37,7 @@ Future<dynamic> getUserInfo(String info, {String userId}) async {
 Future<void> addUserToFollowings(String deauthUserID) async {
   String authUserID = FirebaseAuth.instance.currentUser.uid;
   bool isFollowingUser = await isFollowing(deauthUserID);
-  
+
   if (!isFollowingUser) {
     postDataToAuthUser(deauthUserID, 'followings');
     var x = firebaseRef.child('persons/$deauthUserID/followers').push();
