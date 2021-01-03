@@ -115,7 +115,7 @@ class EditablePostWidget extends StatelessWidget {
       String message = '$username duvarinda gonderi paylaştı';
       db.createNotification(NotificationType.post, profileKey, message);
       updatePostWidgets();
-      onCancel();
+      // onCancel();
     });
   }
 
@@ -125,7 +125,7 @@ class EditablePostWidget extends StatelessWidget {
       String message = '$username duvarinda gonderisini güncelledi';
       db.createNotification(NotificationType.post, profileKey, message);
       updatePostWidgets();
-      onCancel();
+      // onCancel();
     });
   }
 
@@ -135,7 +135,7 @@ class EditablePostWidget extends StatelessWidget {
     String message = '$username duvarinda gonderisini güncelledi';
     await db.createNotification(NotificationType.post, profileKey, message);
 
-    await updatePostWidgets();
-    onCancel();
+    updatePostWidgets();
+    // onCancel();
   }
 }

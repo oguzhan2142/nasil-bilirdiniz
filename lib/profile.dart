@@ -158,6 +158,7 @@ class _ProfileState extends State<Profile> {
     if (postMap == null) {
       setState(() {
         isAlreadyPostedToAuthUser = isPosted;
+        floatingActionVisible = true;
         postCount = 0;
       });
     }
@@ -168,6 +169,7 @@ class _ProfileState extends State<Profile> {
       postWidgets = temp;
       postCount = postMap.length;
       isAlreadyPostedToAuthUser = isPosted;
+      floatingActionVisible = true;
     });
 
     temp = null;
