@@ -20,7 +20,7 @@ class _PersonCardState extends State<PersonCard> {
   void initState() {
     super.initState();
 
-    _userNameFuture = getUserInfo('displayName', userId: widget.personUid);
+    _userNameFuture = getUserInfo('username', userId: widget.personUid);
     _imageDownloadLink = getDownloadLink(uid: widget.personUid);
   }
 

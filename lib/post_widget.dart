@@ -60,7 +60,7 @@ class _PostWidgetState extends State<PostWidget> {
   }
 
   void updateLikeAmountText() {
-    db.getLikeAmount(widget.postKey, widget.postOwnerId).then((value) {
+    db.getLikeAmount(widget.postOwnerId).then((value) {
       setState(() {
         likeAmount = value;
       });
@@ -75,14 +75,15 @@ class _PostWidgetState extends State<PostWidget> {
 
   like() async {
     bool isLiked = await db.isPostLiked(widget.postKey, widget.postOwnerId);
+    String username = await db.getUserInfo('username');
 
     if (isLiked) {
-      await db.unLikePost(widget.postKey, widget.postOwnerId);
-      String message = '${db.displayName} beğenisini kaldırdı';
+      await db.unLikePost(widget.postOwnerId);
+      String message = '$username beğenisini kaldırdı';
       db.createNotification(NotificationType.like, widget.postOwnerId, message);
     } else {
-      await db.likePost(widget.postKey, widget.postOwnerId);
-      String message = '${db.displayName} bir gönderiyi beğendi';
+      await db.likePost(widget.postOwnerId);
+      String message = '$username bir gönderiyi beğendi';
       db.createNotification(NotificationType.like, widget.postOwnerId, message);
     }
     updateCurrentImagePath();
@@ -143,6 +144,7 @@ class _PostWidgetState extends State<PostWidget> {
               ),
             ],
           ),
+          Divider(color: Colors.amber, height: 50, thickness: 0.8)
         ],
       ),
       actionPane: SlidableBehindActionPane(),

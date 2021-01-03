@@ -3,10 +3,11 @@ import 'package:string_similarity/string_similarity.dart';
 class SearchResult implements Comparable {
   String itemKey;
   Map itemValue;
-  double similarity;
+  double similarity = 0;
 
   SearchResult(this.itemKey, this.itemValue, String searchQuery) {
-    String name = itemValue['displayName'];
+    String name = itemValue['username'];
+
     similarity = name.similarityTo(searchQuery);
   }
 

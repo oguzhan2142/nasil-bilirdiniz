@@ -4,7 +4,6 @@ import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'package:kpss_tercih/firebase/firestore.dart';
 import 'package:kpss_tercih/search_page/search_tile_item.dart';
 import 'package:kpss_tercih/search_result.dart';
-import 'package:string_similarity/string_similarity.dart';
 
 class Search extends StatefulWidget {
   @override

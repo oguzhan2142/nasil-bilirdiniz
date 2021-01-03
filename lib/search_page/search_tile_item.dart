@@ -121,7 +121,7 @@ class _SearchTileItemState extends State<SearchTileItem> {
           Align(
             alignment: Alignment.bottomCenter,
             child: Text(
-              widget.userData['displayName'],
+              widget.userData['username'],
               style: TextStyle(color: Colors.white70),
             ),
           )

@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'package:kpss_tercih/firebase/firestore.dart';
@@ -23,6 +22,7 @@ class _EditableSlidableItemState extends State<EditableSlidableItem> {
   Image _imageWidget;
   TextStyle editTextStyle = TextStyle(fontSize: 14, color: Colors.amber[700]);
   TextEditingController editableController = TextEditingController();
+  String username = '';
 
   @override
   void initState() {
@@ -37,6 +37,11 @@ class _EditableSlidableItemState extends State<EditableSlidableItem> {
           if (value != null) _imageWidget = Image.network(value, width: 40);
         }));
     editableController.buildTextSpan(withComposing: true);
+    db.getUserInfo('username').then((value) {
+      setState(() {
+        username = value;
+      });
+    });
   }
 
   @override
@@ -73,7 +78,7 @@ class _EditableSlidableItemState extends State<EditableSlidableItem> {
                           Row(
                             children: [
                               Text(
-                                db.displayName,
+                                username,
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,
@@ -85,12 +90,11 @@ class _EditableSlidableItemState extends State<EditableSlidableItem> {
                                   db
                                       .createPostOnSomeoneWall(
                                     widget.profileKey,
-                                    FirebaseAuth.instance.currentUser.uid,
                                     editableController.text,
                                   )
                                       .whenComplete(() {
                                     String message =
-                                        '${db.displayName} duvarinda gonderi paylaştı';
+                                        '$username duvarinda gonderi paylaştı';
                                     db.createNotification(NotificationType.post,
                                         widget.profileKey, message);
                                   });
@@ -135,6 +139,7 @@ class _EditableSlidableItemState extends State<EditableSlidableItem> {
               ],
             ),
           ),
+          Divider(color: Colors.amber, height: 50, thickness: 0.8),
         ],
       ),
     );

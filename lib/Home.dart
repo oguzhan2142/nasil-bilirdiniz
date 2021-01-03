@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kpss_tercih/profile.dart';
-import 'firebase/database.dart' as db;
-import 'search_page/search_page.dart';
+
 import 'notification_page/notification.dart';
+import 'search_page/search_page.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -17,7 +17,6 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    db.initDisplayName();
   }
 
   @override

@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 
 import 'notification_page/notification_item.dart';
@@ -6,16 +6,26 @@ import 'profile_page/post_choise_button.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
 
 class EditablePostWidget extends StatelessWidget {
-  final TextStyle editTextStyle = TextStyle(fontSize: 14, color: Colors.amber[700]);
+  final TextStyle editTextStyle =
+      TextStyle(fontSize: 14, color: Colors.amber[700]);
   final TextEditingController editableController = TextEditingController();
   final String profileKey;
   final Function onCancel;
+  final bool isUpdateVersion;
   final Function updatePostWidgets;
   final FocusNode focusNode = FocusNode();
 
   EditablePostWidget(
-      {Key key, this.profileKey, this.onCancel, this.updatePostWidgets})
+      {Key key,
+      this.profileKey,
+      this.onCancel,
+      this.updatePostWidgets,
+      @required this.isUpdateVersion})
       : super(key: key);
+
+  void setText(String text) {
+    editableController.text = text;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,12 +40,11 @@ class EditablePostWidget extends StatelessWidget {
                 db
                     .createPostOnSomeoneWall(
                   profileKey,
-                  FirebaseAuth.instance.currentUser.uid,
                   editableController.text,
                 )
-                    .whenComplete(() {
-                  String message =
-                      '${db.displayName} duvarinda gonderi paylaştı';
+                    .whenComplete(() async {
+                  String username = await db.getUserInfo('username');
+                  String message = '$username duvarinda gonderi paylaştı';
                   db.createNotification(
                       NotificationType.post, profileKey, message);
                 });
@@ -46,12 +55,26 @@ class EditablePostWidget extends StatelessWidget {
               borderColor: Colors.green,
               textColor: Colors.green,
             ),
-            SizedBox(width: 14),
+            isUpdateVersion ? SizedBox(width: 6) : Container(),
+            isUpdateVersion
+                ? ChoiseButton(
+                    onClick: () {
+                      // db.updatePost(profileKey, )
+
+                      onCancel();
+                      updatePostWidgets();
+                    },
+                    text: 'Sil',
+                    borderColor: Colors.red,
+                    textColor: Colors.red,
+                  )
+                : Container(),
+            SizedBox(width: 6),
             ChoiseButton(
               onClick: onCancel,
               text: 'Vazgeç',
-              borderColor: Colors.red,
-              textColor: Colors.red,
+              borderColor: Colors.amber,
+              textColor: Colors.amber,
             )
           ],
         ),
@@ -76,7 +99,7 @@ class EditablePostWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             FutureBuilder(
-              future: db.getUserInfo('displayName'),
+              future: db.getUserInfo('username'),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   return Text(
@@ -93,6 +116,7 @@ class EditablePostWidget extends StatelessWidget {
             ),
           ],
         ),
+        Divider(color: Colors.amber, height: 50, thickness: 0.8),
       ],
     );
   }

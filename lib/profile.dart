@@ -36,13 +36,16 @@ class _ProfileState extends State<Profile> {
   bool isFollowingThisUser = false;
   TextEditingController textEditingController = TextEditingController();
   bool floatingActionVisible;
-  EditablePostWidget editableSlidableItem;
+  EditablePostWidget newPostEditablePostWidget;
+  EditablePostWidget updatePostEditablePostWidget;
 
   List<Widget> postWidgets = List();
 
-  List<Widget> createPostWidgetList(Map postMap) {
-    List<Widget> postWidgets = List();
-    var divider = Divider(color: Colors.amber, height: 50, thickness: 0.8);
+  bool isAlreadyPostedToAuthUser = false;
+
+  List<PostWidget> createPostWidgetList(Map postMap) {
+    List<PostWidget> postWidgets = List();
+
     if (postMap == null) return postWidgets;
 
     postMap.forEach((key, value) {
@@ -64,10 +67,6 @@ class _ProfileState extends State<Profile> {
       postWidgets.sort();
     });
 
-    for (var i = 0; i < postWidgets.length; i++) {
-      if (i % 2 == 0) postWidgets.insert(i, divider);
-    }
-    postWidgets.add(divider);
     return postWidgets;
   }
 
@@ -84,13 +83,20 @@ class _ProfileState extends State<Profile> {
     super.initState();
     profileImage = Image.asset('res/user.png', width: 80);
     floatingActionVisible = !widget.isAuthProfile;
-
+    if (!widget.isAuthProfile) {
+      db.isAlreadyPosted(widget.profileID).then((value) {
+        setState(() {
+          isAlreadyPostedToAuthUser = value;
+          print('isAlreay $isAlreadyPostedToAuthUser');
+        });
+      });
+    }
     if (widget.isAuthProfile) {
-      db.getUserInfo('displayName').then((value) {
+      db.getUserInfo('username').then((value) {
         username = value;
       });
     } else {
-      db.getUserInfo('displayName', userId: widget.profileID).then((value) {
+      db.getUserInfo('username', userId: widget.profileID).then((value) {
         if (mounted)
           setState(() {
             username = value;
@@ -115,13 +121,29 @@ class _ProfileState extends State<Profile> {
         });
     });
 
-    editableSlidableItem = EditablePostWidget(
+    newPostEditablePostWidget = EditablePostWidget(
       profileKey: widget.profileID,
       updatePostWidgets: updatePostWidgetsList,
+      isUpdateVersion: false,
       onCancel: () {
         List<Widget> temp = List();
         temp.addAll(postWidgets);
-        temp.remove(editableSlidableItem);
+        temp.remove(newPostEditablePostWidget);
+        if (mounted)
+          setState(() {
+            postWidgets = temp;
+            floatingActionVisible = true;
+          });
+      },
+    );
+    updatePostEditablePostWidget = EditablePostWidget(
+      profileKey: widget.profileID,
+      updatePostWidgets: updatePostWidgetsList,
+      isUpdateVersion: true,
+      onCancel: () {
+        List<Widget> temp = List();
+        temp.addAll(postWidgets);
+        temp.remove(newPostEditablePostWidget);
         if (mounted)
           setState(() {
             postWidgets = temp;
@@ -134,7 +156,7 @@ class _ProfileState extends State<Profile> {
   void updatePostWidgetsList() {
     db.getPostsMap(userID: widget.profileID).then((postMap) {
       if (postMap == null) return;
-      List<Widget> temp = createPostWidgetList(postMap);
+      List<PostWidget> temp = createPostWidgetList(postMap);
       setState(() {
         postWidgets = temp;
         postCount = postMap.length;
@@ -288,18 +310,13 @@ class _ProfileState extends State<Profile> {
         visible: floatingActionVisible,
         child: FloatingActionButton(
           onPressed: () {
-            List<Widget> temp = List();
-            temp.addAll(postWidgets);
-            temp.add(editableSlidableItem);
-
-            setState(() {
-              postWidgets = temp;
-              floatingActionVisible = false;
-            });
-            editableSlidableItem.focusNode.requestFocus();
+            if (!isAlreadyPostedToAuthUser)
+              createNewPostMode();
+            else
+              updatePostMode();
           },
           child: Icon(
-            Icons.add,
+            isAlreadyPostedToAuthUser ? Icons.update : Icons.add,
             color: Colors.amber,
           ),
           backgroundColor: Colors.black.withAlpha(120),
@@ -386,7 +403,7 @@ class _ProfileState extends State<Profile> {
                                   ),
                                   SizedBox(height: 10),
                                   Text(
-                                    username,
+                                    username == null ? 'Bilinmiyor' : username,
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w600,
@@ -542,6 +559,8 @@ class _ProfileState extends State<Profile> {
                           ),
                         ),
                         SizedBox(height: 15),
+                        Divider(
+                            color: Colors.amber, height: 50, thickness: 0.8),
                         Column(
                           children: postWidgets,
                         )
@@ -555,5 +574,38 @@ class _ProfileState extends State<Profile> {
         );
       }),
     );
+  }
+
+  void createNewPostMode() {
+    List<Widget> temp = List();
+    temp.addAll(postWidgets);
+    temp.add(newPostEditablePostWidget);
+    setState(() {
+      postWidgets = temp;
+      floatingActionVisible = false;
+    });
+    newPostEditablePostWidget.focusNode.requestFocus();
+  }
+
+  void updatePostMode() {
+    List<Widget> temp = List();
+    temp.addAll(postWidgets);
+    String authUserID = FirebaseAuth.instance.currentUser.uid;
+    int index = postWidgets.indexWhere((w) {
+      PostWidget postWidget = w;
+      if (postWidget.authorId == authUserID) return true;
+      return false;
+    });
+
+    if (index < 0) return;
+
+    PostWidget postWidget = temp[index];
+    String content = postWidget.content;
+    updatePostEditablePostWidget.setText(content);
+    temp.removeAt(index);
+    temp.insert(index, updatePostEditablePostWidget);
+    setState(() {
+      postWidgets = temp;
+    });
   }
 }
