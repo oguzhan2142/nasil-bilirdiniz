@@ -3,6 +3,8 @@ import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'package:kpss_tercih/firebase/firestore.dart';
 import 'package:kpss_tercih/notification_page/notification_item.dart';
 import 'package:kpss_tercih/profile_page/post_choise_button.dart';
+import 'package:sprintf/sprintf.dart';
+import 'package:kpss_tercih/notifications.dart' as notifications;
 
 class EditableSlidableItem extends StatefulWidget {
   final String profileKey;
@@ -89,14 +91,14 @@ class _EditableSlidableItemState extends State<EditableSlidableItem> {
                                 onClick: () {
                                   db
                                       .createPostOnSomeoneWall(
-                                    widget.profileKey,
-                                    editableController.text,
-                                  )
+                                          widget.profileKey,
+                                          editableController.text)
                                       .whenComplete(() {
-                                    String message =
-                                        '$username duvarinda gonderi paylaştı';
-                                    db.createNotification(NotificationType.post,
-                                        widget.profileKey, message);
+                                    db.createNotification(
+                                      NotificationType.post,
+                                      widget.profileKey,
+                                      sprintf(notifications.posted, username),
+                                    );
                                   });
                                   widget.onCancel();
                                   widget.updatePostWidgets();

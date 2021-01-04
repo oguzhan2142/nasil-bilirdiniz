@@ -3,6 +3,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'notification_page/notification_item.dart';
+import 'package:sprintf/sprintf.dart';
+import 'notifications.dart' as notifications;
 
 class PostWidget extends StatefulWidget implements Comparable {
   final String author;
@@ -16,7 +18,6 @@ class PostWidget extends StatefulWidget implements Comparable {
 
   PostWidget({
     Key key,
-
     @required this.postOwnerId,
     @required this.postKey,
     @required this.author,
@@ -79,12 +80,18 @@ class _PostWidgetState extends State<PostWidget> {
 
     if (isLiked) {
       await db.unLikePost(widget.postOwnerId);
-      String message = '$username beğenisini kaldırdı';
-      db.createNotification(NotificationType.like, widget.postOwnerId, message);
+      db.createNotification(
+        NotificationType.like,
+        widget.postOwnerId,
+        sprintf(notifications.removeLiked, username),
+      );
     } else {
       await db.likePost(widget.postOwnerId);
-      String message = '$username bir gönderiyi beğendi';
-      db.createNotification(NotificationType.like, widget.postOwnerId, message);
+      db.createNotification(
+        NotificationType.like,
+        widget.postOwnerId,
+        sprintf(notifications.liked, username),
+      );
     }
     updateCurrentImagePath();
     updateLikeAmountText();

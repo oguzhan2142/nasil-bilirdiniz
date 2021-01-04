@@ -167,7 +167,7 @@ Future<void> createPostOnSomeoneWall(
   id.set({'author': username, 'content': content, 'date': dateTime.toString()});
 }
 
-Future deletePost(String postOwnerUserID) async{
+Future deletePost(String postOwnerUserID) async {
   String authID = FirebaseAuth.instance.currentUser.uid;
   var ref = firebaseRef
       .child('persons')

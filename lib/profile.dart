@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +7,8 @@ import 'package:kpss_tercih/editable_post_widget.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
 import 'package:kpss_tercih/firebase/firestore.dart' as store;
 import 'package:kpss_tercih/post_widget.dart';
-
+import 'package:sprintf/sprintf.dart';
+import 'notifications.dart' as notifications;
 import 'notification_page/notification_item.dart';
 import 'profile_page/post_choise_button.dart';
 
@@ -162,7 +162,6 @@ class _ProfileState extends State<Profile> {
         postCount = 0;
       });
     }
-    ;
     List<PostWidget> temp = createPostWidgetList(postMap);
 
     setState(() {
@@ -235,9 +234,12 @@ class _ProfileState extends State<Profile> {
           onPressed: () {
             db.addUserToFollowings(widget.profileID).whenComplete(() {
               checkFollowing();
-              String message = '$username takip etti';
+
               db.createNotification(
-                  NotificationType.followed, widget.profileID, message);
+                NotificationType.followed,
+                widget.profileID,
+                sprintf(notifications.followed, username),
+              );
               updateFollowers();
               updateFollowings();
             });
@@ -259,9 +261,12 @@ class _ProfileState extends State<Profile> {
           onPressed: () {
             db.removeUserFromFollowings(widget.profileID).whenComplete(() {
               checkFollowing();
-              String message = '$username takipten çıktı';
+
               db.createNotification(
-                  NotificationType.unfollowed, widget.profileID, message);
+                NotificationType.unfollowed,
+                widget.profileID,
+                sprintf(notifications.unfollowed, username),
+              );
               updateFollowers();
               updateFollowings();
             });

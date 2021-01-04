@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:kpss_tercih/profile.dart';
-
+import 'package:sprintf/sprintf.dart';
 import 'notification_page/notification_item.dart';
 import 'profile_page/post_choise_button.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
+import 'notifications.dart' as notifications;
 
 class EditablePostWidget extends StatelessWidget {
   final TextStyle editTextStyle =
@@ -112,8 +112,11 @@ class EditablePostWidget extends StatelessWidget {
         .createPostOnSomeoneWall(profileKey, editableController.text)
         .whenComplete(() async {
       String username = await db.getUserInfo('username');
-      String message = '$username duvarinda gonderi paylaştı';
-      db.createNotification(NotificationType.post, profileKey, message);
+      db.createNotification(
+        NotificationType.post,
+        profileKey,
+        sprintf(notifications.posted, username),
+      );
       updatePostWidgets();
       // onCancel();
     });
@@ -122,8 +125,11 @@ class EditablePostWidget extends StatelessWidget {
   Future updatePost() async {
     db.updatePost(profileKey, editableController.text).whenComplete(() async {
       String username = await db.getUserInfo('username');
-      String message = '$username duvarinda gonderisini güncelledi';
-      db.createNotification(NotificationType.post, profileKey, message);
+      db.createNotification(
+        NotificationType.post,
+        profileKey,
+        sprintf(notifications.updatedPost, username),
+      );
       updatePostWidgets();
       // onCancel();
     });
@@ -132,8 +138,12 @@ class EditablePostWidget extends StatelessWidget {
   deletePost() async {
     db.deletePost(profileKey);
     String username = await db.getUserInfo('username');
-    String message = '$username duvarinda gonderisini güncelledi';
-    await db.createNotification(NotificationType.post, profileKey, message);
+
+    await db.createNotification(
+      NotificationType.post,
+      profileKey,
+      sprintf(notifications.updatedPost, username),
+    );
 
     updatePostWidgets();
     // onCancel();
