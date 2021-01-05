@@ -57,7 +57,7 @@ class EditablePostWidget extends StatelessWidget {
                 : Container(),
             SizedBox(width: 6),
             ChoiseButton(
-              onClick: onCancel,
+              onClick: cancel,
               text: 'Vazgeç',
               borderColor: Colors.amber,
               textColor: Colors.amber,
@@ -115,7 +115,7 @@ class EditablePostWidget extends StatelessWidget {
       db.createNotification(
         NotificationType.post,
         profileKey,
-        sprintf(notifications.posted, username),
+        sprintf(notifications.posted, [username]),
       );
       updatePostWidgets();
       // onCancel();
@@ -128,7 +128,7 @@ class EditablePostWidget extends StatelessWidget {
       db.createNotification(
         NotificationType.post,
         profileKey,
-        sprintf(notifications.updatedPost, username),
+        sprintf(notifications.updatedPost, [username]),
       );
       updatePostWidgets();
       // onCancel();
@@ -142,10 +142,15 @@ class EditablePostWidget extends StatelessWidget {
     await db.createNotification(
       NotificationType.post,
       profileKey,
-      sprintf(notifications.updatedPost, username),
+      sprintf(notifications.updatedPost, [username]),
     );
 
     updatePostWidgets();
     // onCancel();
+  }
+
+  void cancel() {
+    onCancel();
+    updatePostWidgets();
   }
 }

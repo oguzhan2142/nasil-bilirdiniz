@@ -1,9 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kpss_tercih/profile.dart';
-
 import 'notification_page/notification.dart';
+import 'package:kpss_tercih/notifications.dart' as notifications;
 import 'search_page/search_page.dart';
+import 'package:kpss_tercih/firebase/database.dart' as db;
 
 class Home extends StatefulWidget {
   @override
@@ -17,6 +18,25 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+
+    handleNotifications();
+  }
+
+  void handleNotifications() async {
+    notifications.init().whenComplete(() async {
+      Map notificationMap = await db.fetchNotifications();
+      if (notificationMap == null) return;
+      List<String> not = List();
+      notificationMap.forEach((key, value) {
+        bool isPushed = value['isPushed'];
+
+        if (!isPushed) {
+          not.add(value['message']);
+          db.setNotificationAsPushed(key);
+        }
+      });
+      notifications.showGroupedNotifications(not);
+    });
   }
 
   @override

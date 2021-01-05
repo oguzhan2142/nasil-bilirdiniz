@@ -117,13 +117,13 @@ Future<void> likePost(String likedPersonId) async {
   id.set(authUserID);
 }
 
-Future<bool> isPostLiked(String postId, String likedPersonId) async {
+Future<bool> isPostLiked(String likedPersonId) async {
   String authUserID = FirebaseAuth.instance.currentUser.uid;
   DatabaseReference likedPostRef = firebaseRef
       .child('persons')
       .child(likedPersonId)
       .child('posts')
-      .child(postId)
+      .child(authUserID)
       .child('likedBy');
 
   DataSnapshot likedPostSnap = await likedPostRef.once();
@@ -260,6 +260,18 @@ Future<void> createNotification(
     'message': message,
     'date': datetime.toString(),
     'isPushed': false,
+  });
+}
+
+Future<void> setNotificationAsPushed(String notificationKey) async {
+  var ref = firebaseRef
+      .child('persons')
+      .child(FirebaseAuth.instance.currentUser.uid)
+      .child('notifications')
+      .child(notificationKey);
+
+  ref.update({
+    'isPushed': true,
   });
 }
 

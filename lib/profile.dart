@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import 'package:image_picker/image_picker.dart';
 import 'package:kpss_tercih/editable_post_widget.dart';
 import 'package:kpss_tercih/firebase/database.dart' as db;
@@ -130,7 +132,7 @@ class _ProfileState extends State<Profile> {
         if (mounted)
           setState(() {
             postWidgets = temp;
-            floatingActionVisible = true;
+            if (!widget.isAuthProfile) floatingActionVisible = true;
           });
       },
     );
@@ -146,7 +148,7 @@ class _ProfileState extends State<Profile> {
         if (mounted)
           setState(() {
             postWidgets = temp;
-            floatingActionVisible = true;
+            if (!widget.isAuthProfile) floatingActionVisible = true;
           });
       },
     );
@@ -154,21 +156,23 @@ class _ProfileState extends State<Profile> {
 
   void updatePostWidgetsList() async {
     bool isPosted = await db.isAlreadyPosted(widget.profileID);
+
     Map postMap = await db.getPostsMap(userID: widget.profileID);
     if (postMap == null) {
       setState(() {
         isAlreadyPostedToAuthUser = isPosted;
-        floatingActionVisible = true;
+        if (!widget.isAuthProfile) floatingActionVisible = true;
         postCount = 0;
       });
     }
+
     List<PostWidget> temp = createPostWidgetList(postMap);
 
     setState(() {
       postWidgets = temp;
-      postCount = postMap.length;
+      postCount = postMap == null ? 0 : postMap.length;
       isAlreadyPostedToAuthUser = isPosted;
-      floatingActionVisible = true;
+      if (!widget.isAuthProfile) floatingActionVisible = true;
     });
 
     temp = null;
@@ -196,6 +200,7 @@ class _ProfileState extends State<Profile> {
         : widget.profileID;
 
     String imageUrl = await store.getDownloadLink(uid: id);
+    print('image url $imageUrl');
     if (imageUrl != null) {
       Image temp = Image.network(imageUrl, width: 80);
       if (mounted)
@@ -238,7 +243,7 @@ class _ProfileState extends State<Profile> {
               db.createNotification(
                 NotificationType.followed,
                 widget.profileID,
-                sprintf(notifications.followed, username),
+                sprintf(notifications.followed, [username]),
               );
               updateFollowers();
               updateFollowings();
@@ -265,7 +270,7 @@ class _ProfileState extends State<Profile> {
               db.createNotification(
                 NotificationType.unfollowed,
                 widget.profileID,
-                sprintf(notifications.unfollowed, username),
+                sprintf(notifications.unfollowed, [username]),
               );
               updateFollowers();
               updateFollowings();
@@ -578,7 +583,8 @@ class _ProfileState extends State<Profile> {
                             color: Colors.amber, height: 50, thickness: 0.8),
                         Column(
                           children: postWidgets,
-                        )
+                        ),
+                        SizedBox(height: 60),
                       ],
                     ),
                   ),

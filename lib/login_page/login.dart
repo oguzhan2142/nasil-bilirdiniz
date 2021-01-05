@@ -78,6 +78,7 @@ class Login extends StatelessWidget {
                           height: 30,
                         ),
                         TextField(
+                          obscureText: true,
                             controller: passwordController,
                             decoration: InputDecoration(
                               labelText: 'Password',

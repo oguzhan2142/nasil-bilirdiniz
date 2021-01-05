@@ -53,7 +53,7 @@ class _PostWidgetState extends State<PostWidget> {
   }
 
   void updateCurrentImagePath() {
-    db.isPostLiked(widget.postKey, widget.postOwnerId).then((value) {
+    db.isPostLiked(widget.postOwnerId).then((value) {
       setState(() {
         currentImagePath = value ? 'res/heart1.png' : 'res/heart2.png';
       });
@@ -75,7 +75,7 @@ class _PostWidgetState extends State<PostWidget> {
   }
 
   like() async {
-    bool isLiked = await db.isPostLiked(widget.postKey, widget.postOwnerId);
+    bool isLiked = await db.isPostLiked(widget.postOwnerId);
     String username = await db.getUserInfo('username');
 
     if (isLiked) {
@@ -83,14 +83,14 @@ class _PostWidgetState extends State<PostWidget> {
       db.createNotification(
         NotificationType.like,
         widget.postOwnerId,
-        sprintf(notifications.removeLiked, username),
+        sprintf(notifications.removeLiked, [username]),
       );
     } else {
       await db.likePost(widget.postOwnerId);
       db.createNotification(
         NotificationType.like,
         widget.postOwnerId,
-        sprintf(notifications.liked, username),
+        sprintf(notifications.liked, [username]),
       );
     }
     updateCurrentImagePath();
@@ -171,8 +171,8 @@ class _PostWidgetState extends State<PostWidget> {
                 child: Image.asset(
                   'res/share.png',
                   width: step == SlidableRenderingMode.slide
-                      ? 50 * animation.value
-                      : 50,
+                      ? 30 * animation.value
+                      : 30,
                 ),
                 padding: EdgeInsets.all(15.0),
                 shape: CircleBorder(),
@@ -192,8 +192,8 @@ class _PostWidgetState extends State<PostWidget> {
                   currentImagePath,
                   color: Colors.black,
                   width: step == SlidableRenderingMode.slide
-                      ? 50 * animation.value
-                      : 50,
+                      ? 30 * animation.value
+                      : 30,
                 ),
                 padding: EdgeInsets.all(15.0),
                 shape: CircleBorder(),

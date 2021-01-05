@@ -97,7 +97,7 @@ class _EditableSlidableItemState extends State<EditableSlidableItem> {
                                     db.createNotification(
                                       NotificationType.post,
                                       widget.profileKey,
-                                      sprintf(notifications.posted, username),
+                                      sprintf(notifications.posted, [username]),
                                     );
                                   });
                                   widget.onCancel();

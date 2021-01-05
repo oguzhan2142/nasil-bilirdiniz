@@ -3,11 +3,10 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-FirebaseStorage storage = FirebaseStorage.instance;
-String userId = FirebaseAuth.instance.currentUser.uid;
-
 Future uploadFile(File imageFile) async {
-  Reference ref = storage.ref().child(userId);
+  FirebaseStorage storage = FirebaseStorage.instance;
+  String userID = FirebaseAuth.instance.currentUser.uid;
+  Reference ref = storage.ref().child(userID);
   UploadTask uploadTask = ref.putFile(imageFile);
   uploadTask.then((res) {
     var url = res.ref.getDownloadURL();
@@ -32,9 +31,9 @@ Future<String> getDownloadLink({String uid}) async {
 }
 
 Future<Reference> searchReference({String uid}) async {
-  String lookingUserId = userId;
-
-  if (uid != null) lookingUserId = uid;
+  FirebaseStorage storage = FirebaseStorage.instance;
+  String lookingUserId =
+      uid == null ? FirebaseAuth.instance.currentUser.uid : uid;
 
   ListResult listResult = await storage.ref().listAll();
   for (var item in listResult.items) {

@@ -98,6 +98,7 @@ class SingUp extends StatelessWidget {
                           height: 10,
                         ),
                         TextField(
+                          obscureText: true,
                             controller: passwordController,
                             decoration: InputDecoration(
                               labelText: 'Password',
