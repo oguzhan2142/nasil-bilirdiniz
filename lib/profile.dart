@@ -25,6 +25,7 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  final profileImageSize = 80.0;
   int followingCount = 0;
   int followersCount = 0;
   int postCount = 0;
@@ -82,7 +83,7 @@ class _ProfileState extends State<Profile> {
   @override
   initState() {
     super.initState();
-    profileImage = Image.asset('res/user.png', width: 80);
+    profileImage = Image.asset('res/user.png', width: profileImageSize);
     floatingActionVisible = !widget.isAuthProfile;
     if (!widget.isAuthProfile) {
       db.isAlreadyPosted(widget.profileID).then((value) {
@@ -91,18 +92,7 @@ class _ProfileState extends State<Profile> {
         });
       });
     }
-    if (widget.isAuthProfile) {
-      db.getUserInfo('username').then((value) {
-        username = value;
-      });
-    } else {
-      db.getUserInfo('username', userId: widget.profileID).then((value) {
-        if (mounted)
-          setState(() {
-            username = value;
-          });
-      });
-    }
+    initUsername();
 
     updateFollowers();
 
@@ -121,6 +111,10 @@ class _ProfileState extends State<Profile> {
         });
     });
 
+    initEditablePostWidgets();
+  }
+
+  void initEditablePostWidgets() {
     newPostEditablePostWidget = EditablePostWidget(
       profileKey: widget.profileID,
       updatePostWidgets: updatePostWidgetsList,
@@ -152,6 +146,21 @@ class _ProfileState extends State<Profile> {
           });
       },
     );
+  }
+
+  void initUsername() {
+    if (widget.isAuthProfile) {
+      db.getUserInfo('username').then((value) {
+        username = value;
+      });
+    } else {
+      db.getUserInfo('username', userId: widget.profileID).then((value) {
+        if (mounted)
+          setState(() {
+            username = value;
+          });
+      });
+    }
   }
 
   void updatePostWidgetsList() async {
@@ -200,9 +209,8 @@ class _ProfileState extends State<Profile> {
         : widget.profileID;
 
     String imageUrl = await store.getDownloadLink(uid: id);
-    print('image url $imageUrl');
     if (imageUrl != null) {
-      Image temp = Image.network(imageUrl, width: 80);
+      Image temp = Image.network(imageUrl, width: profileImageSize);
       if (mounted)
         setState(() {
           profileImage = temp;
@@ -220,13 +228,13 @@ class _ProfileState extends State<Profile> {
     });
   }
 
-  Future<bool> getImage() async {
+  Future<bool> getImageFromDisc() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       loadedImageFile = File(pickedFile.path);
       setState(() {
-        profileImage = Image.file(loadedImageFile, width: 80);
+        profileImage = Image.file(loadedImageFile, width: profileImageSize);
       });
     }
     return pickedFile != null;
@@ -389,7 +397,10 @@ class _ProfileState extends State<Profile> {
                                       ClipRRect(
                                         borderRadius:
                                             BorderRadius.circular(360),
-                                        child: profileImage,
+                                        child: SizedBox(
+                                          height: profileImageSize,
+                                          child: profileImage,
+                                        ),
                                       ),
                                       Positioned.fill(
                                         child: widget.isAuthProfile
@@ -399,7 +410,7 @@ class _ProfileState extends State<Profile> {
                                                 child: GestureDetector(
                                                   onTap: () async {
                                                     bool isSuccessfull =
-                                                        await getImage();
+                                                        await getImageFromDisc();
 
                                                     if (isSuccessfull) {
                                                       Reference ref = await store

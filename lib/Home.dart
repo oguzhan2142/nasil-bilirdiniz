@@ -46,11 +46,11 @@ class _HomeState extends State<Home> {
         bottomNavigationBar: BottomNavigationBar(
             items: [
               BottomNavigationBarItem(
-                  icon: Icon(Icons.search), label: 'Search'),
+                  icon: Icon(Icons.search), label: 'Ara'),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.notifications), label: 'Notifications'),
+                  icon: Icon(Icons.notifications), label: 'Bildirimler'),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.person), label: 'Profile'),
+                  icon: Icon(Icons.person), label: 'Profil'),
             ],
             currentIndex: _selectedIndex,
             elevation: 0,

@@ -12,7 +12,6 @@ class SingUp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       backgroundColor: Colors.amber,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -98,7 +97,7 @@ class SingUp extends StatelessWidget {
                           height: 10,
                         ),
                         TextField(
-                          obscureText: true,
+                            obscureText: true,
                             controller: passwordController,
                             decoration: InputDecoration(
                               labelText: 'Password',
